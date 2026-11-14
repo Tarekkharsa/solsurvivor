@@ -34,7 +34,7 @@ export const mars: Content = {
       effects: {}, storm: { dose: 3.5, shelterBlock: 1.8 }, source: 'NASA: MAVEN and Curiosity, September 2017',
     },
     {
-      id: 'flare2003', kind: 'solar', icon: '☀️', title: 'Halloween solar storms (2003)', weight: 1, forecastable: true, real: true, year: 2003,
+      id: 'flare2003', kind: 'solar', icon: '☀️', title: 'Halloween solar storm (2003)', weight: 1, forecastable: true, real: true, year: 2003,
       text: 'Some of the strongest solar storms ever measured. Mars Odyssey’s radiation instrument was knocked out.',
       effects: {}, storm: { dose: 5, shelterBlock: 2.2 }, source: 'NASA: Mars Odyssey MARIE, October 2003',
     },

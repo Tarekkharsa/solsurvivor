@@ -7,6 +7,7 @@ test('plays a sol from the title to the report', async ({ page }, info) => {
   await expect(page.getByRole('heading', { name: /SolSurvivor/ })).toBeVisible()
   if (shots) await page.screenshot({ path: `${shots}/${info.project.name}-title.png` })
   await page.getByRole('button', { name: /Start mission/ }).click()
+  await page.getByRole('button', { name: 'Skip tips' }).click()
   await page.getByRole('button', { name: 'More Oxygen maker' }).click()
   await page.getByRole('button', { name: 'More Oxygen maker' }).click()
   await page.getByRole('button', { name: 'More Greenhouse lights' }).click()

@@ -25,6 +25,9 @@ export function t(key: Key, vars: Record<string, string | number> = {}): string 
   })
 }
 
+/** Like t(), for keys that come from content (crew lines, badges). */
+export const tk = (key: string, vars?: Record<string, string | number>) => t(key as Key, vars)
+
 export const fmt = (n: number) => (Math.round(n * 100) / 100).toString()
 
 /** "1 sol", "3 sols", and the right Arabic form for any number. */
