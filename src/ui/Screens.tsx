@@ -8,6 +8,8 @@ import { challengeLink, useGame } from '../state/store'
 import { MissionChart } from './Chart'
 import { BadgeGrid, PhotoCard } from './Collections'
 import { EffectChips } from './PlanPanel'
+import { TeamReport, TeamSetup } from './Team'
+import { CodeEntry, Discussion } from './ClassMission'
 
 export function Title() {
   const content = useGame((s) => s.content)
@@ -17,6 +19,8 @@ export function Title() {
   const challenge = useGame((s) => s.challenge)
   const profile = useGame((s) => s.profile)
   const openModal = useGame((s) => s.openModal)
+  const modal = useGame((s) => s.modal)
+  const setScreen = useGame((s) => s.setScreen)
   const [level, setLevel] = useState<LevelId>(challenge?.level ?? 'cadet')
   const [world, setWorld] = useState<Content['id']>('mars')
   const pickWorld = useGame((s) => s.pickWorld)
@@ -71,6 +75,10 @@ export function Title() {
             <button className="primary big" onClick={() => start(world, level)}>
               {t('start')} 🚀
             </button>
+            <div className="title-links">
+              <button onClick={() => openModal('teamsetup')}>👥 {t('team')}</button>
+              <button onClick={() => openModal('code')}>🏫 {t('classMission')}</button>
+            </div>
           </>
         )}
         <div className="title-links">
@@ -80,8 +88,11 @@ export function Title() {
           <button onClick={() => openModal('badges')}>
             🏅 {t('badges')} <span className="count">{profile.badges.length}</span>
           </button>
+          <button onClick={() => setScreen('teachers')}>🧑‍🏫 {t('teachers')}</button>
         </div>
       </div>
+      {modal === 'teamsetup' && <TeamSetup world={world} level={level} />}
+      {modal === 'code' && <CodeEntry />}
     </main>
   )
 }
@@ -218,6 +229,8 @@ export function End() {
           <p className="lost-text">{strings().lostText[game.lostOn ?? 'air']}</p>
         )}
         <MissionChart game={game} content={content} />
+        <TeamReport />
+        <Discussion />
         {fresh.badges.length > 0 && (
           <>
             <h3>🏅 {t('newBadge')}</h3>

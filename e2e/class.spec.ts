@@ -1,0 +1,53 @@
+import { expect, test } from '@playwright/test'
+
+const shots = process.env.SHOTS
+
+test('team play: jobs on the rows, a team check before the sol ends', async ({ page }, info) => {
+  await page.goto('/?lang=en')
+  await page.getByRole('button', { name: /Play as a team/ }).click()
+  await page.getByRole('radio', { name: '3 players' }).click()
+  if (shots) await page.screenshot({ path: `${shots}/${info.project.name}-team-setup.png` })
+  await page.getByRole('button', { name: /Start team mission/ }).click()
+  await expect(page.locator('[data-coach="shelter"] .player-tag')).toHaveText('🦊')
+  await expect(page.locator('[data-coach="oxygen"] .player-tag')).toHaveText('🐼')
+  await expect(page.locator('[data-coach="lab"] .player-tag')).toHaveText('🐙')
+  for (let i = 0; i < 2; i++) await page.getByRole('button', { name: 'More Oxygen maker' }).click()
+  await page.getByRole('button', { name: 'More Greenhouse lights' }).click()
+  await page.getByRole('button', { name: /End sol/ }).click()
+  const check = page.getByRole('dialog', { name: /Team check/ })
+  await expect(check).toBeVisible()
+  await expect(check.getByText('Your ⚡: 2')).toBeVisible()
+  await expect(check.getByRole('button', { name: 'End sol' })).toBeDisabled()
+  for (const b of await check.getByRole('button', { name: 'Ready' }).all()) await b.click()
+  if (shots) await page.screenshot({ path: `${shots}/${info.project.name}-team-check.png` })
+  await check.getByRole('button', { name: 'End sol' }).click()
+  await expect(page.getByRole('dialog', { name: 'Sol 1 report' })).toBeVisible()
+})
+
+test('class mission: a typed code starts that exact mission', async ({ page }) => {
+  await page.goto('/?lang=en')
+  await page.getByRole('button', { name: /Class mission/ }).click()
+  const box = page.getByRole('textbox')
+  await box.fill('pluto 1')
+  await page.getByRole('button', { name: /Go/ }).click()
+  await expect(page.getByRole('alert')).toContainText('does not look right')
+  await box.fill('moon ٢٠٠٢')
+  await page.getByRole('button', { name: /Go/ }).click()
+  await expect(page.getByText('Mission code: MOON-2002')).toBeVisible()
+  await expect(page.getByText('Day 1 of 12')).toBeVisible()
+})
+
+test('teachers page: a code, its key, and printable sheets', async ({ page }, info) => {
+  await page.goto('/?lang=en')
+  await page.getByRole('button', { name: /For teachers/ }).click()
+  await expect(page.getByRole('heading', { name: /Make a class mission/ })).toBeVisible()
+  const code = await page.locator('.big-code').innerText()
+  expect(code).toMatch(/^MARS-\d{3}[13579]$/)
+  await expect(page.locator('table.key').first().locator('tbody tr')).toHaveCount(10)
+  await expect(page.locator('table.key tr.solar').first()).toBeVisible()
+  await page.getByRole('radio', { name: 'Commander' }).click()
+  await expect(page.locator('.big-code')).toHaveText(/^MARS-\d{3}[02468]$/)
+  if (shots) await page.screenshot({ path: `${shots}/${info.project.name}-teachers.png`, fullPage: true })
+  await page.getByRole('button', { name: /Back to the game/ }).click()
+  await expect(page.getByRole('button', { name: /Start mission/ })).toBeVisible()
+})

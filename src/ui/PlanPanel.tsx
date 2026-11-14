@@ -3,6 +3,7 @@ import { planCost, powerFor } from '../sim/engine'
 import type { Effects } from '../sim/types'
 import { useGame, usePreview } from '../state/store'
 import { Projects } from './Projects'
+import { OwnerChip } from './Team'
 
 export function EffectChips({ effects }: { effects: Effects }) {
   const content = useGame((s) => s.content)
@@ -34,6 +35,8 @@ export function PlanPanel() {
   const setUnits = useGame((s) => s.setUnits)
   const endTurn = useGame((s) => s.endTurn)
   const repeatPlan = useGame((s) => s.repeatPlan)
+  const team = useGame((s) => s.team)
+  const openModal = useGame((s) => s.openModal)
   const preview = usePreview()
 
   const total = powerFor(game, content)
@@ -111,7 +114,7 @@ export function PlanPanel() {
               ↻ {t('repeatPlan')}
             </button>
           )}
-          <button className={failing ? 'primary end danger' : ready ? 'primary end ready' : 'primary end'} onClick={endTurn} data-coach="end">
+          <button className={failing ? 'primary end danger' : ready ? 'primary end ready' : 'primary end'} onClick={team ? () => openModal('teamcheck') : endTurn} data-coach="end">
             {t('endTurn')} {isRtl() ? '←' : '→'}
           </button>
         </div>
@@ -127,6 +130,7 @@ export function PlanPanel() {
               <div className="action-main">
                 <div className="action-head">
                   <strong>{a.label}</strong>
+                  <OwnerChip action={a.id} />
                   <span className="cost" title={t('powerPerTap')}>
                     {a.cost}⚡
                   </span>

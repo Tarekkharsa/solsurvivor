@@ -6,9 +6,11 @@ import { getLang, setLang, setWorldWords, type Lang } from '../i18n'
 import { createGame, playTurn, powerLeft, previewTurn, projectStatus, replay, stars } from '../sim/engine'
 import type { Content, Game, LevelId, Plan, TurnRecord } from '../sim/types'
 import { drop, load, save } from '../lib/save'
+import { pickMission } from '../content/goodMission'
+import type { RoleId } from '../content/roles'
 
-export type Screen = 'title' | 'play' | 'report' | 'end'
-export type Modal = 'journal' | 'badges' | null
+export type Screen = 'title' | 'play' | 'report' | 'end' | 'teachers'
+export type Modal = 'journal' | 'badges' | 'teamcheck' | 'teamsetup' | 'code' | null
 
 export interface Profile {
   badges: string[]
@@ -29,6 +31,14 @@ interface SavedMission {
   level: LevelId
   seed: number
   plans: Plan[]
+  team?: RoleId[][]
+  classMission?: boolean
+}
+
+export interface StartOptions {
+  team?: RoleId[][]
+  /** Typed from a class code: same mission for everyone, never boosted by live data. */
+  classMission?: boolean
 }
 
 interface State {
@@ -46,7 +56,10 @@ interface State {
   coach: number | null
   challenge?: Challenge
   saved?: SavedMission
-  start: (world: Content['id'], level: LevelId, seed?: number) => void
+  team?: RoleId[][]
+  classMission: boolean
+  start: (world: Content['id'], level: LevelId, seed?: number, opts?: StartOptions) => void
+  setScreen: (s: Screen) => void
   resume: () => void
   setUnits: (id: string, units: number) => void
   toggleProject: (id: string) => void
@@ -63,7 +76,6 @@ interface State {
 }
 
 const emptyPlan = (): Plan => ({ units: {} })
-export const randomSeed = () => 1000 + Math.floor(Math.random() * 9000)
 const blankProfile: Profile = { badges: [], journal: [], wins: 0, coachDone: false }
 
 /** Photos a record unlocks: finished expeditions and wonders like the blue sunset. */
@@ -89,13 +101,29 @@ export const useGame = create<State>((set, get) => ({
     return s && s.plans?.length ? s : undefined
   })(),
 
-  start: (world, level, seed = randomSeed()) => {
+  team: undefined,
+  classMission: false,
+  start: (world, level, seed, opts = {}) => {
     const content = getWorld(world, getLang())
     setWorldWords(world)
-    const coach = get().profile.coachDone ? null : 0
-    set({ screen: 'play', modal: null, content, game: createGame(content, level, seed), plan: emptyPlan(), plans: [], last: undefined, fresh: { badges: [], photos: [] }, coach })
-    save('mission', { world, level, seed, plans: [] })
+    const s = seed ?? pickMission(world, level).seed
+    const coach = get().profile.coachDone || opts.team ? null : 0
+    set({
+      screen: 'play',
+      modal: null,
+      content,
+      game: createGame(content, level, s),
+      plan: emptyPlan(),
+      plans: [],
+      last: undefined,
+      fresh: { badges: [], photos: [] },
+      coach,
+      team: opts.team,
+      classMission: !!opts.classMission,
+    })
+    save('mission', { world, level, seed: s, plans: [], team: opts.team, classMission: opts.classMission })
   },
+  setScreen: (screen) => set({ screen, modal: null }),
 
   resume: () => {
     const s = get().saved
@@ -103,7 +131,7 @@ export const useGame = create<State>((set, get) => ({
     const content = getWorld(s.world, getLang())
     setWorldWords(s.world)
     const game = replay(content, s.level, s.seed, s.plans)
-    set({ screen: game.status === 'playing' ? 'play' : 'end', content, game, plans: s.plans, plan: emptyPlan(), coach: null, fresh: { badges: [], photos: [] } })
+    set({ screen: game.status === 'playing' ? 'play' : 'end', content, game, plans: s.plans, plan: emptyPlan(), coach: null, fresh: { badges: [], photos: [] }, team: s.team, classMission: !!s.classMission })
   },
 
   setUnits: (id, units) => {
@@ -162,21 +190,22 @@ export const useGame = create<State>((set, get) => ({
     if (after.status !== 'playing') {
       const wins = profile.wins + (after.status === 'won' ? 1 : 0)
       const earned = badges.filter((b) => !nextProfile.badges.includes(b.id) && b.test(after, content, { journal: nextProfile.journal, wins })).map((b) => b.id)
+      if (get().team && after.status === 'won' && !nextProfile.badges.includes('teamwork')) earned.push('teamwork')
       nextProfile = { ...nextProfile, wins, badges: [...nextProfile.badges, ...earned] }
       fresh.badges = earned
       drop('mission')
     } else {
-      save('mission', { world: content.id, level: after.level, seed: after.seed, plans: allPlans })
+      save('mission', { world: content.id, level: after.level, seed: after.seed, plans: allPlans, team: get().team, classMission: get().classMission })
     }
     if (coach !== null) nextProfile = { ...nextProfile, coachDone: true }
     save('profile', nextProfile)
-    set({ game: after, plans: allPlans, plan: emptyPlan(), last: record, screen: 'report', profile: nextProfile, fresh, coach: null, saved: undefined })
+    set({ game: after, plans: allPlans, plan: emptyPlan(), last: record, screen: 'report', modal: null, profile: nextProfile, fresh, coach: null, saved: undefined })
   },
 
   next: () => set({ screen: get().game.status === 'playing' ? 'play' : 'end' }),
   quit: () => {
     const { game, content, plans } = get()
-    const saved = game.status === 'playing' && plans.length ? { world: content.id, level: game.level, seed: game.seed, plans } : undefined
+    const saved = game.status === 'playing' && plans.length ? { world: content.id, level: game.level, seed: game.seed, plans, team: get().team, classMission: get().classMission } : undefined
     set({ screen: 'title', modal: null, saved })
   },
   openModal: (modal) => set({ modal }),

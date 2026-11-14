@@ -2,6 +2,7 @@ import { count, t } from '../i18n'
 import { planCost, powerFor, projectStatus } from '../sim/engine'
 import type { Project } from '../sim/types'
 import { useGame } from '../state/store'
+import { OwnerChip } from './Team'
 
 function ProjectCard({ p }: { p: Project }) {
   const content = useGame((s) => s.content)
@@ -32,6 +33,7 @@ function ProjectCard({ p }: { p: Project }) {
           {p.icon}
         </span>
         <strong>{p.label}</strong>
+        <OwnerChip projectKind={p.kind} />
         {reward ? (
           <span className="chip good">
             <bdi dir="ltr">+{reward}</bdi> {science.icon}
