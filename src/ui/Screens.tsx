@@ -3,7 +3,7 @@ import { speak } from '../lib/audio'
 import { getLang } from '../i18n'
 import { photoById } from '../content/photos'
 import { downloadCertificate } from '../lib/certificate'
-import { count, fmt, isRtl, strings, t } from '../i18n'
+import { count, fmt, isRtl, strings, t, tk } from '../i18n'
 import { stars } from '../sim/engine'
 import type { Content, LevelId } from '../sim/types'
 import { challengeLink, useGame } from '../state/store'
@@ -13,6 +13,11 @@ import { EffectChips } from './PlanPanel'
 import { TeamReport, TeamSetup } from './Team'
 import { CodeEntry, Discussion } from './ClassMission'
 import { LiveSun } from './Live'
+import { GlossaryText } from './Glossary'
+import { crew } from '../content/crew'
+import { assignRoles } from '../content/roles'
+import { parseCode } from '../lib/missionCode'
+import { marsDelayMinutes, moonDelaySeconds } from '../lib/orbits'
 
 export function Title() {
   const content = useGame((s) => s.content)
@@ -24,78 +29,171 @@ export function Title() {
   const openModal = useGame((s) => s.openModal)
   const modal = useGame((s) => s.modal)
   const setScreen = useGame((s) => s.setScreen)
+  const lang = useGame((s) => s.lang)
+  const setLanguage = useGame((s) => s.setLanguage)
+  const teamSize = useGame((s) => s.teamSize)
+  const setTeamSize = useGame((s) => s.setTeamSize)
+  const settings = useGame((s) => s.settings)
+  const setSetting = useGame((s) => s.setSetting)
   // `world=` and `level=` in the URL preselect the choices.
   const q = new URLSearchParams(location.search)
   const [level, setLevel] = useState<LevelId>(challenge?.level ?? (q.get('level') === 'commander' ? 'commander' : 'cadet'))
   const [world, setWorld] = useState<Content['id']>(() => useGame.getState().content.id)
   const pickWorld = useGame((s) => s.pickWorld)
+  const [code, setCode] = useState('')
+  const [badCode, setBadCode] = useState(false)
   const choose = (w: Content['id']) => {
     setWorld(w)
     pickWorld(w)
   }
+  const go = () => start(world, level, undefined, teamSize > 1 ? { team: assignRoles(teamSize) } : {})
+  const join = (e: React.FormEvent) => {
+    e.preventDefault()
+    const m = parseCode(code)
+    if (!m) return setBadCode(true)
+    start(m.world, m.level, m.seed, { classMission: true, team: teamSize > 1 ? assignRoles(teamSize) : undefined })
+  }
+  const moon = world === 'moon'
+  const delay = moon ? t('signalDelayMoon', { n: Math.round(moonDelaySeconds() * 10) / 10 }) : t('signalDelay', { n: Math.round(marsDelayMinutes() * 10) / 10 })
+  const offline = typeof navigator !== 'undefined' && 'serviceWorker' in navigator && !!navigator.serviceWorker.controller
+
   return (
     <main className={`title-screen ${world}`}>
-      <div className="title-card">
-        <h1>
-          <span aria-hidden>{world === 'moon' ? '🌕' : '🔴'}</span> {t('appName')}
-        </h1>
-        <p className="tagline">{t('tagline')}</p>
-        <LiveSun />
-        {saved && (
-          <button className="big resume" onClick={resume}>
-            ▶ {t('resume', { n: saved.plans.length + 1 })}
-          </button>
-        )}
-        {challenge ? (
-          <div className="challenge-banner">
-            <p>⚔️ {t('challengeTitle', { n: challenge.stars })}</p>
-            <button className="primary big" onClick={() => start(challenge.world, challenge.level, challenge.seed)}>
-              {t('start')} 🚀
+      <div className="title-card two">
+        <section className="title-left">
+          <p className="kicker">{t('kicker')}</p>
+          <div className="lang-pill" role="group" aria-label={t('language')}>
+            <button className={lang === 'en' ? 'on' : ''} aria-pressed={lang === 'en'} onClick={() => setLanguage('en')} lang="en">
+              English
+            </button>
+            <button className={lang === 'ar' ? 'on' : ''} aria-pressed={lang === 'ar'} onClick={() => setLanguage('ar')} lang="ar">
+              العربية
             </button>
           </div>
-        ) : (
-          <>
-            <h2>{t('chooseWorld')}</h2>
-            <div className="worlds" role="radiogroup" aria-label={t('chooseWorld')}>
-              {(['mars', 'moon'] as const).map((w) => (
-                <button key={w} role="radio" aria-checked={world === w} className={world === w ? `world ${w} on` : `world ${w}`} onClick={() => choose(w)}>
-                  <span className="world-ball" aria-hidden />
-                  <strong>{t(w === 'mars' ? 'worldMarsName' : 'worldMoonName')}</strong>
-                  <span>{t(w === 'mars' ? 'worldMarsInfo' : 'worldMoonInfo')}</span>
-                </button>
-              ))}
+          <h1 className="logo" dir="ltr">
+            <span>Sol</span>Survivor
+          </h1>
+          <p className="story">
+            <GlossaryText text={t(moon ? 'storyMoon' : 'storyMars')} />
+          </p>
+          <h2>{t('meetCrew')}</h2>
+          <ul className="crew-row">
+            {crew.map((c) => (
+              <li key={c.id}>
+                <span className="crew-face" style={{ background: c.color }} aria-hidden>
+                  {c.face}
+                </span>
+                <strong>{lang === 'ar' ? c.nameAr : c.name}</strong>
+                <small>{tk(`role_${c.id}`)}</small>
+              </li>
+            ))}
+          </ul>
+          <h2>{t('whoPlaying')}</h2>
+          <div className="who" role="radiogroup" aria-label={t('whoPlaying')}>
+            {[1, 2, 3, 4].map((n) => (
+              <button key={n} role="radio" aria-checked={teamSize === n} className={teamSize === n ? 'on' : ''} onClick={() => setTeamSize(n)}>
+                <span aria-hidden>{'🧑‍🚀'.repeat(n)}</span>
+                <span>{n === 1 ? t('justMe') : count(n, 'player')}</span>
+              </button>
+            ))}
+          </div>
+        </section>
+        <section className="title-right">
+          {saved && (
+            <button className="big resume" onClick={resume}>
+              ▶ {t('resume', { n: saved.plans.length + 1 })}
+            </button>
+          )}
+          {challenge ? (
+            <div className="challenge-banner">
+              <p>⚔️ {t('challengeTitle', { n: challenge.stars })}</p>
+              <button className="primary big" onClick={() => start(challenge.world, challenge.level, challenge.seed)}>
+                {t('start')} 🚀
+              </button>
             </div>
-            <h2>{t('chooseLevel')}</h2>
-            <div className="levels" role="radiogroup" aria-label={t('chooseLevel')}>
-              {(['cadet', 'commander'] as const).map((id) => {
-                const lv = content.levels[id]
-                return (
-                  <button key={id} role="radio" aria-checked={level === id} className={level === id ? 'level on' : 'level'} onClick={() => setLevel(id)}>
-                    <strong>{t(id)}</strong>
-                    <span>{t(id === 'cadet' ? 'cadetAge' : 'commanderAge')}</span>
-                    <span className="level-info">{t('cadetInfo', { count: count(lv.turns), power: lv.power })}</span>
+          ) : (
+            <>
+              <h2>{t('chooseWorld')}</h2>
+              <div className="worlds" role="radiogroup" aria-label={t('chooseWorld')}>
+                {(['mars', 'moon'] as const).map((w) => (
+                  <button key={w} role="radio" aria-checked={world === w} className={world === w ? `world ${w} on` : `world ${w}`} onClick={() => choose(w)}>
+                    <span className="world-ball" aria-hidden />
+                    <strong>{t(w === 'mars' ? 'worldMarsName' : 'worldMoonName')}</strong>
+                    <span>{t(w === 'mars' ? 'worldMarsInfo' : 'worldMoonInfo')}</span>
                   </button>
-                )
-              })}
-            </div>
-            <button className="primary big" onClick={() => start(world, level)}>
+                ))}
+              </div>
+              <h2>{t('chooseLevel')}</h2>
+              <div className="levels" role="radiogroup" aria-label={t('chooseLevel')}>
+                {(['cadet', 'commander'] as const).map((id) => {
+                  const lv = content.levels[id]
+                  return (
+                    <button key={id} role="radio" aria-checked={level === id} className={level === id ? 'level on' : 'level'} onClick={() => setLevel(id)}>
+                      <strong>
+                        {id === 'cadet' ? '🧑‍🚀' : '👩‍✈️'} {t(id)}
+                      </strong>
+                      <span>{t(id === 'cadet' ? 'cadetAge' : 'commanderAge')}</span>
+                      <span className="level-info">{t('cadetInfo', { count: count(lv.turns), power: lv.power })}</span>
+                    </button>
+                  )
+                })}
+              </div>
+              <form className="code-row" onSubmit={join}>
+                <label htmlFor="code">🏫 {t('codeHave')}</label>
+                <div>
+                  <input
+                    id="code"
+                    value={code}
+                    onChange={(e) => (setCode(e.target.value), setBadCode(false))}
+                    placeholder={t('codeHint')}
+                    autoComplete="off"
+                    spellCheck={false}
+                    dir="ltr"
+                    aria-invalid={badCode}
+                    aria-describedby={badCode ? 'code-bad' : undefined}
+                  />
+                  <button type="submit">{t('join')}</button>
+                </div>
+                {badCode && (
+                  <p id="code-bad" className="end-warn" role="alert">
+                    {t('codeBad')}
+                  </p>
+                )}
+              </form>
+            </>
+          )}
+          <LiveSun />
+          <p className="title-fact">📡 {delay}</p>
+          {offline && <p className="title-fact">✅ {t('offlineReady')}</p>}
+          {!challenge && (
+            <button className="primary big start-btn" onClick={go}>
               {t('start')} 🚀
             </button>
-            <div className="title-links">
-              <button onClick={() => openModal('teamsetup')}>👥 {t('team')}</button>
-              <button onClick={() => openModal('code')}>🏫 {t('classMission')}</button>
-            </div>
-          </>
-        )}
-        <div className="title-links">
-          <button onClick={() => openModal('journal')}>
-            📔 {t('journal')} <span className="count">{profile.journal.length}</span>
-          </button>
-          <button onClick={() => openModal('badges')}>
-            🏅 {t('badges')} <span className="count">{profile.badges.length}</span>
-          </button>
-          <button onClick={() => setScreen('teachers')}>🧑‍🏫 {t('teachers')}</button>
-        </div>
+          )}
+          <div className="title-links">
+            <button className="link" onClick={() => setScreen('teachers')}>
+              🍎 {t('teachers')}
+            </button>
+            <button className="link" onClick={() => openModal('journal')}>
+              📔 {t('journal')} (<bdi dir="ltr">{profile.journal.length}</bdi>)
+            </button>
+            <button className="link" onClick={() => openModal('badges')}>
+              🏅 {t('badges')} (<bdi dir="ltr">{profile.badges.length}</bdi>)
+            </button>
+          </div>
+          <div className="title-toggles">
+            {(['sound', 'music', 'contrast', 'readAloud'] as const).map((k) => (
+              <label key={k}>
+                <input type="checkbox" checked={settings[k]} onChange={(e) => setSetting(k, e.target.checked)} />{' '}
+                {t(k === 'sound' ? 'setSound' : k === 'music' ? 'setMusic' : k === 'contrast' ? 'setContrast' : 'setRead')}
+              </label>
+            ))}
+          </div>
+          <details className="facts">
+            <summary>{t('facts')}</summary>
+            <p>{t('factsBody')}</p>
+          </details>
+        </section>
       </div>
       {modal === 'teamsetup' && <TeamSetup world={world} level={level} />}
       {modal === 'code' && <CodeEntry />}

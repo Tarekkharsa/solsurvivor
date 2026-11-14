@@ -7,7 +7,7 @@ for (const world of ['mars', 'moon']) {
     test.setTimeout(90_000)
     const errors: string[] = []
     page.on('pageerror', (e) => errors.push(e.message))
-    await page.goto(`/?lang=en&live=0&3d=1&seed=1004&world=${world}&level=cadet`)
+    await page.goto(`/?lang=en&live=0&3d=1&intro=0&seed=1004&world=${world}&level=cadet`)
     await page.getByRole('button', { name: /Start mission/ }).click()
     await page.getByRole('button', { name: 'Skip tips' }).click()
     await expect(page.locator('.stage canvas')).toBeVisible({ timeout: 20000 })
@@ -54,3 +54,14 @@ for (const world of ['mars', 'moon']) {
     await expect(page.getByText(/Tip 1 of 4/)).toBeVisible()
   })
 }
+
+test('first load opens with the orbit shot, then the title', async ({ page }, info) => {
+  test.skip(info.project.name !== 'desktop', 'one browser is enough')
+  await page.goto('/?lang=en&live=0&3d=1')
+  await expect(page.getByText('On average 225 million km from Earth')).toBeVisible()
+  await page.waitForTimeout(2500)
+  if (shots) await page.screenshot({ path: `${shots}/load-intro.png` })
+  await expect(page.getByRole('button', { name: /Start mission/ })).toBeVisible({ timeout: 15000 })
+  await page.reload()
+  await expect(page.getByRole('button', { name: /Start mission/ })).toBeVisible()
+})

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { assignRoles, ownerOf, playerColors, playerIcons, powerUsedBy, roleById, teamReport, type RoleId } from '../content/roles'
-import { fmt, t, tk } from '../i18n'
+import { count, fmt, t, tk } from '../i18n'
 import type { Content, LevelId } from '../sim/types'
 import { useGame, usePreview } from '../state/store'
 import { Dialog } from './Collections'
@@ -34,7 +34,7 @@ export function TeamSetup({ world, level }: { world: Content['id']; level: Level
       <div className="seg" role="radiogroup" aria-label={t('team')}>
         {[2, 3, 4].map((k) => (
           <button key={k} role="radio" aria-checked={n === k} className={n === k ? 'on' : ''} onClick={() => setN(k)}>
-            {t('players', { n: k })}
+            {count(k, 'player')}
           </button>
         ))}
       </div>

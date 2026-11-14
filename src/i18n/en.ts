@@ -158,6 +158,20 @@ export const en = {
   buildIdle: 'Nothing being built.',
   buildIdleCan: 'Nothing being built. You have enough 🔬 for an upgrade!',
   photoChip: 'photo',
+  kicker: 'NASA Space Apps 2026 · Junior Astronaut Mission Trainer',
+  storyMars: 'You are the commander of a small base in Jezero Crater on Mars. Your solar panels make power every sol (a Mars day). Share it out to keep your crew breathing, fed and safe from radiation. Send the rover to real places NASA explored, and make discoveries!',
+  storyMoon: 'You are the commander of a small base at the Moon’s south pole. Your solar panels catch the low Sun every day. Share out the power to keep your crew breathing, fed and safe from radiation. Drive the rover to real craters where NASA found ice!',
+  meetCrew: 'Meet your crew',
+  whoPlaying: 'Who is playing?',
+  justMe: 'Just me',
+  codeHave: 'Have a class mission code?',
+  join: 'Join',
+  offlineReady: 'Ready to play offline',
+  facts: 'Where the facts come from',
+  factsBody: 'Every storm, place and photo comes from a NASA mission, and the game says which. Meters are game points and time is sped up. Live data shows its source.',
+  creditsLink: 'All NASA sources',
+  introMarsFact: 'On average 225 million km from Earth',
+  introMoonFact: 'On average 384,400 km from Earth',
   appName: 'SolSurvivor',
   tagline: 'Keep your crew alive on Mars, with real NASA data.',
   chooseLevel: 'Choose your level',
@@ -235,9 +249,10 @@ export const en = {
 }
 /** Plural forms, picked with Intl.PluralRules for the language. */
 export type PluralForms = Partial<Record<Intl.LDMLPluralRule | 'twoPrep', string>>
-export const plurals: Record<'sol' | 'day', PluralForms> = {
+export const plurals: Record<'sol' | 'day' | 'player', PluralForms> = {
   sol: { one: '1 sol', other: '{n} sols' },
   day: { one: '1 day', other: '{n} days' },
+  player: { one: '1 player', other: '{n} players' },
 }
 
 export type Strings = typeof en

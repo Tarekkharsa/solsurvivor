@@ -2085,3 +2085,298 @@ body[data-world='moon'] .sol-badge {
   white-space: nowrap;
   pointer-events: none;
 }
+
+/* ===== Title v2: a mission briefing over the base ===== */
+.title-wrap.with-stage .stage {
+  position: fixed;
+  inset: 0;
+  height: auto;
+  border: none;
+  border-radius: 0;
+}
+.title-wrap.with-stage .title-screen {
+  position: relative;
+  background: linear-gradient(90deg, #0b050388, #0b050333 60%, #0b050388);
+}
+body[data-world='moon'] .title-wrap.with-stage .title-screen {
+  background: linear-gradient(90deg, #00000099, #00000033 60%, #00000099);
+}
+.title-card.two {
+  max-width: 1000px;
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  gap: 1.6rem;
+  text-align: start;
+  padding: 1.4rem 1.6rem;
+  background: #1a0f0bdd;
+  backdrop-filter: blur(10px);
+}
+body[data-world='moon'] .title-card.two {
+  background: #12161ddd;
+}
+.title-card.two h2 {
+  text-align: start;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.8rem;
+  margin: 1rem 0 0.5rem;
+}
+.title-right > h2:first-of-type {
+  margin-top: 0;
+}
+.kicker {
+  margin: 0;
+  color: var(--accent2);
+  font-weight: 800;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.lang-pill {
+  display: inline-flex;
+  margin: 0.5rem 0 0.2rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 2px;
+}
+.lang-pill button {
+  min-height: 32px;
+  padding: 0.1rem 0.8rem;
+  border: none;
+  background: none;
+  font-size: 0.9rem;
+  font-family: 'Cairo', 'Nunito', sans-serif;
+}
+.lang-pill button.on {
+  background: var(--accent2);
+  color: #2a0f04;
+  font-weight: 800;
+}
+.logo {
+  font-family: 'Fredoka', 'Nunito', sans-serif;
+  font-size: clamp(2.6rem, 6vw, 4rem);
+  line-height: 1;
+  margin: 0.3rem 0 0.6rem;
+  letter-spacing: -0.01em;
+  text-align: start;
+}
+:root[dir='rtl'] .logo {
+  text-align: right;
+}
+.logo span {
+  color: var(--accent);
+  text-shadow: 0 0 24px #ff8a4c66;
+}
+.story {
+  font-size: 1.08rem;
+  margin: 0;
+  line-height: 1.55;
+}
+.crew-row {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  text-align: center;
+}
+.crew-row li {
+  display: grid;
+  justify-items: center;
+  gap: 0.1rem;
+}
+.crew-face {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 1.9rem;
+  box-shadow: 0 0 0 3px #ffffff22;
+}
+.crew-row small {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+.who {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.4rem;
+}
+.who button {
+  display: grid;
+  gap: 0.1rem;
+  justify-items: center;
+  border-radius: 12px;
+  padding: 0.4rem 0.2rem;
+  font-size: 0.85rem;
+}
+.who button span:first-child {
+  font-size: 0.8rem;
+  letter-spacing: -0.2em;
+}
+.who button.on,
+.title-card.two .level.on,
+.title-card.two .world.on {
+  border: 2px solid var(--accent2);
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+}
+.title-card.two .worlds,
+.title-card.two .levels {
+  margin-bottom: 0;
+}
+.title-card.two .world {
+  align-items: flex-start;
+  text-align: start;
+  padding: 0.6rem 0.8rem;
+}
+.title-card.two .world-ball {
+  width: 30px;
+  height: 30px;
+}
+.title-card.two .level {
+  text-align: start;
+  align-items: flex-start;
+  padding: 0.6rem 0.8rem;
+}
+.code-row {
+  margin-top: 0.9rem;
+  display: grid;
+  gap: 0.35rem;
+}
+.code-row label {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+.code-row div {
+  display: flex;
+  gap: 0.4rem;
+}
+.code-row input {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  padding: 0.55rem 0.8rem;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: #00000055;
+  color: var(--text);
+  text-transform: uppercase;
+}
+.code-row button {
+  border-radius: 12px;
+  font-weight: 800;
+}
+.title-right .live {
+  margin: 0.9rem 0 0.4rem;
+}
+.title-fact {
+  margin: 0.3rem 0;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+.start-btn {
+  width: 100%;
+  margin-top: 0.8rem;
+  font-size: 1.3rem;
+  padding: 0.9rem;
+  font-family: 'Fredoka', 'Nunito', sans-serif;
+  letter-spacing: 0.01em;
+}
+.title-card.two .title-links {
+  justify-content: space-between;
+  margin-top: 0.7rem;
+}
+.title-card.two .title-links button.link {
+  color: var(--sky);
+  min-height: 36px;
+  padding: 0.2rem;
+}
+.title-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 1rem;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+}
+.title-toggles input {
+  accent-color: var(--accent);
+  width: 18px;
+  height: 18px;
+  vertical-align: -3px;
+}
+.facts {
+  margin-top: 0.6rem;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+.facts summary {
+  cursor: pointer;
+}
+
+/* Glossary */
+.term-wrap {
+  position: relative;
+}
+.term {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  min-height: 0;
+  border-radius: 0;
+  text-decoration: underline dotted var(--accent2) 2px;
+  text-underline-offset: 3px;
+  cursor: help;
+}
+:root[dir='rtl'] .term {
+  text-decoration: none;
+  background: #ffb36b2a;
+  border-radius: 4px;
+  padding: 0 2px;
+}
+.term-tip {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  inset-inline-start: 0;
+  z-index: 20;
+  width: max-content;
+  max-width: 260px;
+  background: #10324a;
+  border: 1px solid var(--sky);
+  border-radius: 10px;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.85rem;
+  line-height: 1.35;
+  color: #fff;
+  box-shadow: 0 8px 24px #0008;
+}
+
+@media (max-width: 860px) {
+  .title-card.two {
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+    padding: 1rem;
+  }
+  .title-wrap.with-stage .title-screen {
+    align-items: start;
+  }
+}
+
+.intro-text.world {
+  top: auto;
+  bottom: 14%;
+  left: 6%;
+  right: auto;
+  text-align: start;
+}
+:root[dir='rtl'] .intro-text.world {
+  left: auto;
+  right: 6%;
+}
+.intro-text.world h2 {
+  font-family: 'Fredoka', 'Nunito', sans-serif;
+  font-size: clamp(2.6rem, 8vw, 4.5rem);
+}

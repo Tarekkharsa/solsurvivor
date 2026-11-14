@@ -251,7 +251,7 @@ export default function Stage({ seconds, fast: wantFast }: { seconds: number; fa
       {visible.map((c, i) => (
         <Pop key={`${c.source}${i}`} change={c} content={content} at={spotFor(c.source, content)} />
       ))}
-      <OrbitControls enablePan={false} minDistance={8} maxDistance={60} maxPolarAngle={1.4} target={[0, -1.6, 1.5]} autoRotate={lapse} autoRotateSpeed={0.6} enableDamping />
+      <OrbitControls enablePan={false} minDistance={8} maxDistance={60} maxPolarAngle={1.4} target={[0, -1.6, 1.5]} autoRotate={lapse || screen === 'title'} autoRotateSpeed={screen === 'title' ? 0.35 : 0.6} enableDamping />
     </Canvas>
   )
 }

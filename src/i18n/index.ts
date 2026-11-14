@@ -5,7 +5,7 @@ export type Lang = 'en' | 'ar'
 type Key = { [K in keyof Strings]: Strings[K] extends string ? K : never }[keyof Strings]
 
 const tables: Record<Lang, Strings> = { en, ar }
-const pluralTables: Record<Lang, Record<'sol' | 'day', PluralForms>> = { en: enPlurals, ar: arPlurals }
+const pluralTables: Record<Lang, Record<'sol' | 'day' | 'player', PluralForms>> = { en: enPlurals, ar: arPlurals }
 /** Per-world wording (the Moon counts days, not sols). */
 const worldTables: Record<string, Partial<Record<Lang, Partial<Strings>>>> = {}
 let lang: Lang = 'en'
@@ -50,7 +50,7 @@ export const turnWord = (): 'sol' | 'day' => (world === 'moon' ? 'day' : 'sol')
  * "1 sol", "3 sols", and the right Arabic form for any number. In Arabic, 1 and 2
  * take no numeral, and the dual changes after a preposition (`prep`).
  */
-export function count(n: number, word: 'sol' | 'day' = turnWord(), prep = false): string {
+export function count(n: number, word: 'sol' | 'day' | 'player' = turnWord(), prep = false): string {
   const forms = pluralTables[lang][word]
   const rule = Number.isInteger(n) ? new Intl.PluralRules(lang).select(n) : 'other'
   const form = (rule === 'two' && prep ? forms.twoPrep : undefined) ?? forms[rule] ?? forms.other ?? ''

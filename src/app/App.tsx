@@ -43,9 +43,12 @@ export function App() {
   const graphics = useGame((s) => s.settings.graphics)
   const view3d = useGame((s) => s.view3d)
   const setView3d = useGame((s) => s.setView3d)
+  const maybeIntro = useGame((s) => s.maybeIntro)
   useEffect(() => {
     setView3d(graphics === '3d' || (graphics === 'auto' && canDo3D()))
-  }, [graphics, setView3d])
+    // First load in 3D: the opening shot from orbit, then the title.
+    maybeIntro()
+  }, [graphics, setView3d, maybeIntro])
   // Music turns tense when a storm is coming or dust is on the panels.
   useEffect(() => {
     const storm = warning(game, content)
@@ -65,18 +68,14 @@ export function App() {
   )
 
   if (screen === 'teachers') return <Teachers key={lang} />
+  if (screen === 'intro' && useGame.getState().introNext === 'title') return <IntroOverlay />
   if (screen === 'title')
     return (
-      <>
-        <div className="corner-tools" key={`l${lang}`}>
-          <LangSwitch inline />
-          <button className="icon-btn" onClick={() => openModal('settings')} aria-label={t('settings')}>
-            ⚙️
-          </button>
-        </div>
+      <div className={view3d ? 'title-wrap with-stage' : 'title-wrap'}>
+        {view3d && <StageSlot />}
         <Title key={lang} />
         {modals}
-      </>
+      </div>
     )
 
   if (view3d)

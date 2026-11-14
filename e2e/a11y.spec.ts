@@ -13,7 +13,7 @@ for (const lang of ['en', 'ar']) {
     await page.goto(`/?lang=${lang}&live=0`)
     await audit(page, 'title')
     await page.locator('.title-links button').nth(1).click()
-    await audit(page, 'code')
+    await audit(page, 'journal')
     await page.keyboard.press('Escape')
     await page.getByRole('button', { name: lang === 'en' ? /Start mission/ : /ابدأ المهمة/ }).click()
     await audit(page, 'play+coach')
@@ -25,7 +25,7 @@ for (const lang of ['en', 'ar']) {
     await audit(page, 'settings')
     await page.keyboard.press('Escape')
     await page.locator('.topbar button.link').click()
-    await page.locator('.title-links button', { hasText: /teachers|للمعلّمين/ }).click()
+    await page.locator('.title-links button').first().click()
     await audit(page, 'teachers')
   })
 }

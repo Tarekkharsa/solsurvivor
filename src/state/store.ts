@@ -82,6 +82,9 @@ interface State {
   next: () => void
   lapseDone: () => void
   introDone: () => void
+  /** Where the opening shot leads: the title on first load, the base when a mission starts. */
+  introNext: Screen
+  maybeIntro: () => void
   /** The 3D base is on. Set once at startup from the device and settings. */
   view3d: boolean
   setView3d: (on: boolean) => void
@@ -91,6 +94,8 @@ interface State {
   setChallenge: (c?: Challenge) => void
   lang: Lang
   pickWorld: (w: Content['id']) => void
+  teamSize: number
+  setTeamSize: (n: number) => void
   setLanguage: (l: Lang) => void
 }
 
@@ -151,6 +156,7 @@ export const useGame = create<State>((set, get) => ({
     const coach = get().profile.coachDone || opts.team ? null : 0
     set({
       screen: wantIntro(get().view3d) ? 'intro' : 'play',
+      introNext: 'play',
       modal: null,
       content,
       game: createGame(content, level, s),
@@ -260,7 +266,13 @@ export const useGame = create<State>((set, get) => ({
     } catch {
       // ignore
     }
-    if (get().screen === 'intro') set({ screen: 'play' })
+    if (get().screen === 'intro') set({ screen: get().introNext })
+  },
+  introNext: 'play',
+  maybeIntro: () => {
+    // A URL `intro=` setting is about mission starts (demos and tests), so skip the first-load shot then.
+    if (new URLSearchParams(location.search).has('intro')) return
+    if (get().screen === 'title' && wantIntro(get().view3d)) set({ screen: 'intro', introNext: 'title' })
   },
   view3d: false,
   setView3d: (view3d) => set({ view3d }),
@@ -278,6 +290,8 @@ export const useGame = create<State>((set, get) => ({
   },
   setChallenge: (challenge) => set({ challenge }),
   lang: getLang(),
+  teamSize: 1,
+  setTeamSize: (teamSize) => set({ teamSize }),
   pickWorld: (w) => {
     setWorldWords(w)
     set({ content: getWorld(w, getLang()) })
