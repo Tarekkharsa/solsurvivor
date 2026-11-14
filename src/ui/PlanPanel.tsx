@@ -136,7 +136,7 @@ export function PlanPanel() {
                   <EffectChips effects={a.perUnit} />
                   {a.delayed && (
                     <span className="later">
-                      {t('inTurns', { count: count(a.delayed.turns, 'sol') })}: <EffectChips effects={a.delayed.perUnit} />
+                      {t('inTurns', { count: count(a.delayed.turns, undefined, true) })}: <EffectChips effects={a.delayed.perUnit} />
                     </span>
                   )}
                 </p>

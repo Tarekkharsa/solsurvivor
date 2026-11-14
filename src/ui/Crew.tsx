@@ -1,5 +1,5 @@
 import { crew, morningLine } from '../content/crew'
-import { tk } from '../i18n'
+import { isRtl, tk } from '../i18n'
 import { useGame } from '../state/store'
 
 /** The morning message, said by the crew member it matters to. */
@@ -15,7 +15,7 @@ export function Morning() {
       </span>
       <div>
         <strong className="who">
-          {who.name} <span className="role">· {tk(`role_${who.id}`)}</span>
+          {isRtl() ? who.nameAr : who.name} <span className="role">· {tk(`role_${who.id}`)}</span>
         </strong>
         <p className="line">{tk(line.key, line.vars)}</p>
       </div>

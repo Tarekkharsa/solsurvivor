@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react'
 import { badges } from '../content/badges'
 import { photoById, photos } from '../content/photos'
-import { t, tk } from '../i18n'
+import { photoTitle } from '../content'
+import { getLang, t, tk } from '../i18n'
 import { useGame } from '../state/store'
 
 /** A dialog that takes focus, keeps Tab inside and closes on Escape. */
@@ -47,11 +48,12 @@ export function Dialog({ title, onClose, children, className = '' }: { title: st
 export function PhotoCard({ id, big }: { id: string; big?: boolean }) {
   const p = photoById(id)
   if (!p) return null
+  const title = photoTitle(p.id, getLang(), p.title)
   return (
     <figure className={big ? 'photo big' : 'photo'}>
-      <img src={p.file} alt={p.title} loading="lazy" />
+      <img src={p.file} alt={title} loading="lazy" />
       <figcaption>
-        {p.title}
+        {title}
         <small>
           {p.credit} · {p.nasaId}
         </small>

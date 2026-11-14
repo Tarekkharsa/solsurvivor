@@ -58,7 +58,7 @@ export function Meters() {
   const next = preview?.game.resources[content.scienceId] ?? have
   const gotStars = level.stars.filter((s) => earned >= s).length
   return (
-    <section className="meters" aria-label="Meters">
+    <section className="meters" aria-label={t('metersLabel')}>
       {content.resources
         .filter((r) => r.critical)
         .map((r) => (

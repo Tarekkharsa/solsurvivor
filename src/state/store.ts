@@ -1,7 +1,8 @@
 import { useMemo } from 'react'
 import { create } from 'zustand'
 import { badges } from '../content/badges'
-import { worlds } from '../content'
+import { getWorld } from '../content'
+import { getLang, setLang, setWorldWords, type Lang } from '../i18n'
 import { createGame, playTurn, powerLeft, previewTurn, projectStatus, replay, stars } from '../sim/engine'
 import type { Content, Game, LevelId, Plan, TurnRecord } from '../sim/types'
 import { drop, load, save } from '../lib/save'
@@ -56,6 +57,8 @@ interface State {
   openModal: (m: Modal) => void
   skipCoach: () => void
   setChallenge: (c?: Challenge) => void
+  lang: Lang
+  setLanguage: (l: Lang) => void
 }
 
 const emptyPlan = (): Plan => ({ units: {} })
@@ -73,8 +76,8 @@ function photosFrom(record: TurnRecord, content: Content): string[] {
 export const useGame = create<State>((set, get) => ({
   screen: 'title',
   modal: null,
-  content: worlds.mars,
-  game: createGame(worlds.mars, 'cadet', 1),
+  content: getWorld('mars', getLang()),
+  game: createGame(getWorld('mars', getLang()), 'cadet', 1),
   plan: emptyPlan(),
   plans: [],
   profile: load('profile', blankProfile),
@@ -86,7 +89,8 @@ export const useGame = create<State>((set, get) => ({
   })(),
 
   start: (world, level, seed = randomSeed()) => {
-    const content = worlds[world]
+    const content = getWorld(world, getLang())
+    setWorldWords(world)
     const coach = get().profile.coachDone ? null : 0
     set({ screen: 'play', modal: null, content, game: createGame(content, level, seed), plan: emptyPlan(), plans: [], last: undefined, fresh: { badges: [], photos: [] }, coach })
     save('mission', { world, level, seed, plans: [] })
@@ -95,7 +99,8 @@ export const useGame = create<State>((set, get) => ({
   resume: () => {
     const s = get().saved
     if (!s) return
-    const content = worlds[s.world]
+    const content = getWorld(s.world, getLang())
+    setWorldWords(s.world)
     const game = replay(content, s.level, s.seed, s.plans)
     set({ screen: game.status === 'playing' ? 'play' : 'end', content, game, plans: s.plans, plan: emptyPlan(), coach: null, fresh: { badges: [], photos: [] } })
   },
@@ -180,6 +185,12 @@ export const useGame = create<State>((set, get) => ({
     set({ coach: null, profile })
   },
   setChallenge: (challenge) => set({ challenge }),
+  lang: getLang(),
+  setLanguage: (l) => {
+    setLang(l)
+    save('lang', { lang: l })
+    set({ lang: l, content: getWorld(get().content.id, l) })
+  },
 }))
 
 /** The live preview of the plan being made. */

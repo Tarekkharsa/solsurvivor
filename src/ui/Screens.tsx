@@ -47,7 +47,7 @@ export function Title() {
                   <button key={id} role="radio" aria-checked={level === id} className={level === id ? 'level on' : 'level'} onClick={() => setLevel(id)}>
                     <strong>{t(id)}</strong>
                     <span>{t(id === 'cadet' ? 'cadetAge' : 'commanderAge')}</span>
-                    <span className="level-info">{t('cadetInfo', { count: count(lv.turns, 'sol'), power: lv.power })}</span>
+                    <span className="level-info">{t('cadetInfo', { count: count(lv.turns), power: lv.power })}</span>
                   </button>
                 )
               })}

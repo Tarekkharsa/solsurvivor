@@ -63,6 +63,8 @@ export const en = {
   close: 'Close',
   worldMars: 'Mars',
   worldMoon: 'the Moon',
+  skipToPlan: 'Skip to the plan',
+  metersLabel: 'Meters',
   appName: 'SolSurvivor',
   tagline: 'Keep your crew alive on Mars, with real NASA data.',
   chooseLevel: 'Choose your level',
@@ -139,8 +141,10 @@ export const en = {
   quit: 'Leave mission',
 }
 /** Plural forms, picked with Intl.PluralRules for the language. */
-export const plurals = {
-  sol: { one: '1 sol', other: '{n} sols' } as Partial<Record<Intl.LDMLPluralRule, string>>,
+export type PluralForms = Partial<Record<Intl.LDMLPluralRule | 'twoPrep', string>>
+export const plurals: Record<'sol' | 'day', PluralForms> = {
+  sol: { one: '1 sol', other: '{n} sols' },
+  day: { one: '1 day', other: '{n} days' },
 }
 
 export type Strings = typeof en

@@ -4,15 +4,16 @@ import type { Content, Game } from '../sim/types'
 export interface CrewMember {
   id: 'amara' | 'leo' | 'mei'
   name: string
+  nameAr: string
   role: string
   face: string
   color: string
 }
 
 export const crew: CrewMember[] = [
-  { id: 'amara', name: 'Amara', role: 'Commander', face: '👩🏾‍🚀', color: '#ffb36b' },
-  { id: 'leo', name: 'Leo', role: 'Engineer', face: '👨🏻‍🚀', color: '#8fd3ff' },
-  { id: 'mei', name: 'Mei', role: 'Scientist', face: '👩🏻‍🔬', color: '#6fdc9a' },
+  { id: 'amara', name: 'Amara', nameAr: 'أمارا', role: 'Commander', face: '👩🏾‍🚀', color: '#ffb36b' },
+  { id: 'leo', name: 'Leo', nameAr: 'ليو', role: 'Engineer', face: '👨🏻‍🚀', color: '#8fd3ff' },
+  { id: 'mei', name: 'Mei', nameAr: 'مي', role: 'Scientist', face: '👩🏻‍🔬', color: '#6fdc9a' },
 ]
 
 export type Mood = 'alarm' | 'worry' | 'happy' | 'calm'

@@ -16,6 +16,7 @@ export function App() {
   const modal = useGame((s) => s.modal)
   const openModal = useGame((s) => s.openModal)
   const setChallenge = useGame((s) => s.setChallenge)
+  const lang = useGame((s) => s.lang)
   useEffect(() => setChallenge(readChallenge(location.search)), [setChallenge])
   const modals = (
     <>
@@ -26,14 +27,15 @@ export function App() {
   if (screen === 'title')
     return (
       <>
-        <Title />
+        <LangSwitch key={lang} />
+        <Title key={lang} />
         {modals}
       </>
     )
   return (
-    <div className="app">
+    <div className="app" key={lang}>
       <a className="skip" href="#plan">
-        Skip to the plan
+        {t('skipToPlan')}
       </a>
       <div className="behind" inert={screen !== 'play' || !!modal}>
       <header className="topbar">
@@ -42,6 +44,7 @@ export function App() {
         </button>
         <strong className="sol">{t('solOf', { n: game.turn, total: level.turns })}</strong>
         <span className="level-tag">{t(game.level)}</span>
+        <LangSwitch inline />
         <button className="icon-btn" onClick={() => openModal('journal')} aria-label={t('journal')}>
           📔
         </button>
@@ -57,5 +60,15 @@ export function App() {
       <Coach />
       {modals}
     </div>
+  )
+}
+
+function LangSwitch({ inline }: { inline?: boolean }) {
+  const lang = useGame((s) => s.lang)
+  const setLanguage = useGame((s) => s.setLanguage)
+  return (
+    <button className={inline ? 'icon-btn lang' : 'lang corner'} onClick={() => setLanguage(lang === 'ar' ? 'en' : 'ar')} lang={lang === 'ar' ? 'en' : 'ar'}>
+      {lang === 'ar' ? 'English' : 'عربي'}
+    </button>
   )
 }

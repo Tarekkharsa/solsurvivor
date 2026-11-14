@@ -15,10 +15,11 @@ function ProjectCard({ p }: { p: Project }) {
   const tooDear = !chosen && status === 'ready' && left < p.powerPerTurn
   const needs = p.requires?.find((r) => !game.done.includes(r))
   const reward = p.reward[content.scienceId]
+  const science = content.resources.find((r) => r.id === content.scienceId)!
 
   let note = ''
   if (chosen) note = t('starting')
-  else if (status === 'running') note = t('running', { count: count(active!.left, 'sol') })
+  else if (status === 'running') note = t('running', { count: count(active!.left) })
   else if (status === 'done') note = t('done')
   else if (status === 'locked') note = t('locked', { name: content.projects.find((x) => x.id === needs)?.label ?? '' })
   else if (status === 'busy') note = t('busy')
@@ -31,12 +32,20 @@ function ProjectCard({ p }: { p: Project }) {
           {p.icon}
         </span>
         <strong>{p.label}</strong>
-        {reward ? <span className="chip good">{t('reward', { n: reward })}</span> : null}
-        {p.price ? <span className="chip price">−{t('price', { n: p.price })}</span> : null}
+        {reward ? (
+          <span className="chip good">
+            <bdi dir="ltr">+{reward}</bdi> {science.icon}
+          </span>
+        ) : null}
+        {p.price ? (
+          <span className="chip price">
+            <bdi dir="ltr">−{p.price}</bdi> {science.icon}
+          </span>
+        ) : null}
       </div>
       <p className="project-text">{p.text}</p>
       <div className="project-foot">
-        <span className="project-meta">{t('turnsPower', { count: count(p.turns, 'sol'), power: p.powerPerTurn })}</span>
+        <span className="project-meta">{t('turnsPower', { count: count(p.turns), power: p.powerPerTurn })}</span>
         {(status === 'ready' || chosen) && (
           <button className={chosen ? 'small on' : 'small'} onClick={() => toggle(p.id)} disabled={tooDear} aria-pressed={chosen}>
             {chosen ? t('cancelProject') : t('startProject')}

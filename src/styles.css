@@ -102,6 +102,23 @@ button.small.on {
   inset-inline-start: 0.5rem;
 }
 
+:root:lang(ar) {
+  --font: 'Cairo', 'Nunito', 'Segoe UI', system-ui, sans-serif;
+}
+:lang(ar) body {
+  line-height: 1.55;
+}
+button.lang.corner {
+  position: fixed;
+  top: 0.75rem;
+  inset-inline-end: 0.75rem;
+  z-index: 10;
+  font-weight: 700;
+}
+button.lang {
+  font-family: 'Cairo', 'Nunito', system-ui, sans-serif;
+  font-weight: 700;
+}
 bdi {
   unicode-bidi: isolate;
 }
