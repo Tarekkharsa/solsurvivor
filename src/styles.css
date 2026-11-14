@@ -334,7 +334,7 @@ bdi {
   font-size: 2.3rem;
   line-height: 1;
 }
-.morning .who {
+.morning .speaker {
   color: var(--who);
 }
 .morning .role {
@@ -1496,6 +1496,7 @@ body[data-world='moon'] .stage {
 }
 .lapse-bar {
   position: absolute;
+  white-space: nowrap;
   bottom: 1rem;
   left: 50%;
   transform: translateX(-50%);
@@ -1634,6 +1635,9 @@ body[data-world='moon'] .stage {
 .game .stage {
   position: absolute;
   inset: 0;
+  /* Labels drawn in the 3D scene stay under the top bar and the dock. */
+  isolation: isolate;
+  z-index: 0;
   height: auto;
   border: none;
   border-radius: 0;
@@ -1641,6 +1645,7 @@ body[data-world='moon'] .stage {
 .game-ui {
   position: absolute;
   inset: 0;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
@@ -1996,6 +2001,19 @@ body[data-world='moon'] .sol-badge {
   .game .morning .line {
     font-size: 0.92rem;
   }
+  .game .morning .role {
+    display: none;
+  }
+  /* After a moment the message shrinks to one line, so the base stays in view. Tap to read it all. */
+  .game .morning.small .line {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .game .morning.small .speaker {
+    display: none;
+  }
   .game .dock {
     max-height: 52vh;
     overflow: auto;
@@ -2108,11 +2126,12 @@ body[data-world='moon'] .title-wrap.with-stage .title-screen {
   gap: 1.6rem;
   text-align: start;
   padding: 1.4rem 1.6rem;
-  background: #1a0f0bdd;
-  backdrop-filter: blur(10px);
+  /* See-through, so the base shows behind the briefing. */
+  background: #1a0f0bb8;
+  backdrop-filter: blur(4px);
 }
 body[data-world='moon'] .title-card.two {
-  background: #12161ddd;
+  background: #12161dbf;
 }
 .title-card.two h2 {
   text-align: start;

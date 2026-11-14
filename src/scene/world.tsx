@@ -47,16 +47,19 @@ export function Ground({ moon }: { moon: boolean }) {
     g.rotateX(-Math.PI / 2)
     const pos = g.attributes.position
     const colors: number[] = []
-    const base = new THREE.Color(moon ? '#8e8e8c' : '#b0532a')
-    const dark = new THREE.Color(moon ? '#55565a' : '#6e2d14')
-    const light = new THREE.Color(moon ? '#b9b9b4' : '#d17a45')
+    const base = new THREE.Color(moon ? '#8e8e8c' : '#b8673c')
+    const dark = new THREE.Color(moon ? '#55565a' : '#9a4e2c')
+    const light = new THREE.Color(moon ? '#b9b9b4' : '#cf8a5a')
     const c = new THREE.Color()
     for (let i = 0; i < pos.count; i++) {
       const x = pos.getX(i)
       const z = pos.getZ(i)
       pos.setY(i, heightAt(x, z, moon))
-      const n = fbm(x * 0.2 + 5, z * 0.2 - 3)
-      c.copy(base).lerp(n > 0.5 ? light : dark, Math.abs(n - 0.5) * 1.6)
+      const n = fbm(x * 0.12 + 5, z * 0.12 - 3)
+      c.copy(base).lerp(n > 0.5 ? light : dark, Math.min(1, Math.abs(n - 0.5) * 2.2))
+      // A packed-down pad around the base, where the crew walks every day.
+      const pad = Math.max(0, 1 - Math.hypot(x, z) / 9)
+      c.lerp(moon ? dark : light, pad * 0.35)
       colors.push(c.r, c.g, c.b)
     }
     g.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3))
@@ -77,11 +80,13 @@ export function Rocks({ moon, count = 140 }: { moon: boolean; count?: number }) 
     const o = new THREE.Object3D()
     for (let i = 0; i < count; i++) {
       const a = hash(i, 1) * Math.PI * 2
-      const r = 9 + hash(i, 2) * 40
+      const far = i % 5 === 0
+      const r = far ? 26 + hash(i, 2) * 40 : 8.5 + hash(i, 2) * 26
       const x = Math.cos(a) * r
       const z = Math.sin(a) * r
-      const s = 0.12 + Math.pow(hash(i, 3), 3) * 0.9
-      o.position.set(x, heightAt(x, z, moon) + s * 0.3, z)
+      // Pebbles near the base, a few big boulders further out.
+      const s = far ? 1.2 + hash(i, 3) * 2.6 : 0.08 + Math.pow(hash(i, 3), 3) * (r < 16 ? 0.35 : 0.7)
+      o.position.set(x, heightAt(x, z, moon) + s * 0.25, z)
       o.rotation.set(hash(i, 4) * 3, hash(i, 5) * 3, hash(i, 6) * 3)
       o.scale.set(s, s * 0.7, s)
       o.updateMatrix()
@@ -100,7 +105,7 @@ export function Rocks({ moon, count = 140 }: { moon: boolean; count?: number }) 
       receiveShadow
     >
       <dodecahedronGeometry args={[1, 0]} />
-      <meshStandardMaterial color={moon ? '#77777a' : '#5e2a17'} roughness={1} flatShading />
+      <meshStandardMaterial color={moon ? '#77777a' : '#94512f'} roughness={1} flatShading />
     </instancedMesh>
   )
 }
@@ -122,9 +127,10 @@ varying vec3 vDir;
 void main() {
   vec3 d = normalize(vDir);
   float h = clamp(d.y, 0.0, 1.0);
-  vec3 dayTop = mix(vec3(0.76, 0.52, 0.34), vec3(0.0), moon);
-  vec3 dayHor = mix(vec3(0.86, 0.64, 0.44), vec3(0.02), moon);
-  vec3 col = mix(dayHor, dayTop, pow(h, 0.45));
+  // A butterscotch sky: dust in the air makes the Martian day sky pale orange.
+  vec3 dayTop = mix(vec3(0.74, 0.55, 0.42), vec3(0.0), moon);
+  vec3 dayHor = mix(vec3(0.93, 0.76, 0.6), vec3(0.02), moon);
+  vec3 col = mix(dayHor, dayTop, pow(h, 0.6));
   col = mix(col, vec3(0.55, 0.33, 0.18), dust * (1.0 - moon));
   vec3 s = normalize(sunDir);
   float sd = max(dot(d, s), 0.0);

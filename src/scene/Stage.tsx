@@ -29,7 +29,7 @@ function spotFor(source: string, content: Content): Vec {
 
 function Pop({ change, content, at }: { change: Change; content: Content; at: Vec }) {
   return (
-    <Html position={at as unknown as THREE.Vector3Tuple} center distanceFactor={14} zIndexRange={[20, 0]}>
+    <Html position={at as unknown as THREE.Vector3Tuple} center distanceFactor={24} zIndexRange={[20, 0]}>
       <div className="pop3d" aria-hidden>
         {Object.entries(change.effects).map(([id, v = 0]) => {
           const r = content.resources.find((x) => x.id === id)
@@ -102,17 +102,17 @@ function Lights({ sun, day, moon, fast }: { sun: THREE.Vector3; day: number; moo
   useFrame(() => {
     if (dir.current) {
       dir.current.position.copy(sun).multiplyScalar(30)
-      dir.current.intensity += ((sun.y > -0.02 ? (moon ? 3.2 : 2.4) : 0) - dir.current.intensity) * 0.1
+      dir.current.intensity += ((sun.y > -0.02 ? (moon ? 3.2 : 2.9) : 0) - dir.current.intensity) * 0.1
       dir.current.color.set(sun.y < 0.25 && !moon ? '#ffc890' : '#fff4e6')
     }
-    if (amb.current) amb.current.intensity += ((moon ? 0.25 : 0.06 + day * 0.6) - amb.current.intensity) * 0.1
-    if (hemi.current) hemi.current.intensity += ((moon ? 0.3 : 0.05 + day * 0.4) - hemi.current.intensity) * 0.1
+    if (amb.current) amb.current.intensity += ((moon ? 0.25 : 0.06 + day * 0.45) - amb.current.intensity) * 0.1
+    if (hemi.current) hemi.current.intensity += ((moon ? 0.3 : 0.05 + day * 1.1) - hemi.current.intensity) * 0.1
   })
   return (
     <>
       <ambientLight ref={amb} intensity={0.6} color={moon ? '#9fb0d0' : '#ffd9c0'} />
-      <hemisphereLight ref={hemi} args={[moon ? '#334' : '#ffcfa0', moon ? '#111' : '#5a2010', 0.4]} />
-      <directionalLight ref={dir} castShadow={!fast} shadow-mapSize={[1024, 1024]} shadow-camera-left={-14} shadow-camera-right={14} shadow-camera-top={14} shadow-camera-bottom={-14} />
+      <hemisphereLight ref={hemi} args={[moon ? '#334' : '#ffe6cc', moon ? '#111' : '#9a5534', 0.4]} />
+      <directionalLight ref={dir} castShadow={!fast} shadow-mapSize={[2048, 2048]} shadow-bias={-0.0004} shadow-normalBias={0.02} shadow-camera-left={-14} shadow-camera-right={14} shadow-camera-top={14} shadow-camera-bottom={-14} />
     </>
   )
 }
@@ -128,15 +128,28 @@ function FogControl({ color, near, far }: { color: string; near: number; far: nu
   return null
 }
 
-/** Steps the camera back on tall, narrow screens so the whole base fits above the dock. */
-function CameraRig({ close }: { close: boolean }) {
+const TARGET = new THREE.Vector3(0, 1.1, 0.4)
+
+/**
+ * A low, three-quarter view of the base with the horizon in shot, like a photo taken nearby.
+ * The picture is shifted up so the base sits in the open space between the top bar and the dock.
+ */
+function CameraRig({ mode }: { mode: 'title' | 'play' | 'lapse' }) {
   const { camera, size } = useThree()
   useEffect(() => {
+    const cam = camera as THREE.PerspectiveCamera
     const aspect = size.width / size.height
-    const k = (aspect < 0.8 ? 2.3 : aspect < 1.3 ? 1.6 : 1.25) * (close ? 0.78 : 1)
-    camera.position.set(11 * k, 8.5 * k, 13 * k)
-    camera.updateProjectionMatrix()
-  }, [camera, size.width, size.height, close])
+    const phone = aspect < 0.8
+    const lift = mode === 'play' ? (phone ? 0.27 : 0.28) : mode === 'lapse' ? (phone ? 0.3 : 0.08) : 0.12
+    const full = size.height * (1 + lift)
+    cam.aspect = size.width / full
+    cam.setViewOffset(size.width, full, 0, full - size.height, size.width, size.height)
+    const dist = (phone ? 40 : aspect < 1.3 ? 36 : 30) * (mode === 'lapse' && !phone ? 0.86 : mode === 'title' ? 0.72 : 1)
+    const dir = new THREE.Vector3(0.4, phone ? 0.42 : 0.34, 0.85).normalize()
+    cam.position.copy(TARGET).addScaledVector(dir, dist)
+    cam.lookAt(TARGET)
+    cam.updateProjectionMatrix()
+  }, [camera, size.width, size.height, mode])
   return null
 }
 
@@ -217,16 +230,16 @@ export default function Stage({ seconds, fast: wantFast }: { seconds: number; fa
     <Canvas
       shadows={!fast}
       dpr={fast ? 1 : [1, 1.75]}
-      camera={{ position: [11, 7.5, 13], fov: 40, near: 0.1, far: 800 }}
+      camera={{ position: [8, 7, 17], fov: 46, near: 0.1, far: 800 }}
       gl={{ antialias: !fast, powerPreference: 'high-performance' }}
       frameloop="always"
     >
-      <CameraRig close={lapse} />
+      <CameraRig mode={lapse ? 'lapse' : screen === 'title' ? 'title' : 'play'} />
       <PerformanceMonitor onDecline={() => setSlow(true)} />
       <Sky sun={sun} day={day} moon={moon} dust={dustNow ? 0.8 : 0} storm={storm + warned} />
       {(moon || night || day < 0.4) && <Stars radius={200} depth={40} count={moon ? 4000 : 2500} factor={4} fade speed={0.3} />}
       {moon && <Earth />}
-      <FogControl color={moon ? '#000000' : dustNow ? '#9a5a33' : day > 0.3 ? '#c98d60' : '#140a08'} near={moon ? 60 : dustNow ? 6 : 25} far={moon ? 260 : dustNow ? 40 : 140} />
+      <FogControl color={moon ? '#000000' : dustNow ? '#a8673d' : day > 0.3 ? '#e2b48e' : '#140a08'} near={moon ? 60 : dustNow ? 6 : 22} far={moon ? 260 : dustNow ? 40 : 95} />
       <Lights sun={sun} day={day} moon={moon} fast={fast} />
       <Ground moon={moon} />
       <Rocks moon={moon} count={fast ? 60 : 140} />
@@ -251,7 +264,7 @@ export default function Stage({ seconds, fast: wantFast }: { seconds: number; fa
       {visible.map((c, i) => (
         <Pop key={`${c.source}${i}`} change={c} content={content} at={spotFor(c.source, content)} />
       ))}
-      <OrbitControls enablePan={false} minDistance={8} maxDistance={60} maxPolarAngle={1.4} target={[0, -1.6, 1.5]} autoRotate={lapse || screen === 'title'} autoRotateSpeed={screen === 'title' ? 0.35 : 0.6} enableDamping />
+      <OrbitControls enablePan={false} minDistance={8} maxDistance={60} maxPolarAngle={1.45} target={TARGET.toArray()} autoRotate={lapse || screen === 'title'} autoRotateSpeed={screen === 'title' ? 0.35 : 0.6} enableDamping />
     </Canvas>
   )
 }

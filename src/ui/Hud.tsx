@@ -114,7 +114,7 @@ export function Hud() {
           📔 <bdi dir="ltr">{journal}</bdi>
         </button>
         <button onClick={() => setLanguage(lang === 'ar' ? 'en' : 'ar')} lang={lang === 'ar' ? 'en' : 'ar'} className="lang">
-          {lang === 'ar' ? 'EN' : 'ع'}
+          {lang === 'ar' ? 'EN' : 'عربي'}
         </button>
         <button onClick={() => open('settings')} aria-label={t('settings')}>
           ⚙️

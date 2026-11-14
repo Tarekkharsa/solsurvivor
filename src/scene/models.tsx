@@ -106,7 +106,7 @@ function Helipad() {
 /** A name tag over a crew member. */
 export function NameTag({ name, color }: { name: string; color: string }) {
   return (
-    <Html position={[0, 1.45, 0]} center distanceFactor={16} zIndexRange={[10, 0]}>
+    <Html position={[0, 1.45, 0]} center distanceFactor={24} zIndexRange={[10, 0]}>
       <span className="name-tag" style={{ borderColor: color }} aria-hidden>
         {name}
       </span>
