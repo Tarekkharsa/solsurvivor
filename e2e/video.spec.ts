@@ -129,8 +129,8 @@ test('record the demo video', async ({}, info) => {
   while (game.status === 'playing') {
     const plan = strategies.careful(game, mars, rand)
     // Stop early if the screen and the engine ever disagree.
-    await expect(page.locator('.topbar .sol')).toHaveText(new RegExp(`\\b${game.turn}\\b`), { timeout: 15000 })
-    await expect(page.locator('.meter').first()).toHaveAttribute('aria-valuenow', String(game.resources.air))
+    await expect(page.locator('.sol-badge')).toHaveText(new RegExp(`\\b${game.turn}\\b`), { timeout: 15000 })
+    await expect(page.locator('.hud-meter').first()).toHaveAttribute('aria-valuenow', String(game.resources.air))
     const warned = !!warning(game, mars)?.storm
     if (game.turn === 1) await mark('plan')
     if (warned) {
