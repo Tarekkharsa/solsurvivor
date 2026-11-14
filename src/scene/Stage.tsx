@@ -1,4 +1,4 @@
-import { Html, OrbitControls, Stars } from '@react-three/drei'
+import { Html, OrbitControls, PerformanceMonitor, Stars } from '@react-three/drei'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
@@ -146,7 +146,10 @@ function useLapse(active: boolean, seconds: number, onDone: () => void) {
   return t
 }
 
-export default function Stage({ seconds, fast }: { seconds: number; fast: boolean }) {
+export default function Stage({ seconds, fast: wantFast }: { seconds: number; fast: boolean }) {
+  // Auto graphics: drop to the fast look if the frame rate sags on this device.
+  const [slow, setSlow] = useState(false)
+  const fast = wantFast || slow
   const content = useGame((s) => s.content)
   const game = useGame((s) => s.game)
   const plan = useGame((s) => s.plan)
@@ -203,6 +206,7 @@ export default function Stage({ seconds, fast }: { seconds: number; fast: boolea
       gl={{ antialias: !fast, powerPreference: 'high-performance' }}
       frameloop="always"
     >
+      <PerformanceMonitor onDecline={() => setSlow(true)} />
       <Sky sun={sun} day={day} moon={moon} dust={dustNow ? 0.8 : 0} storm={storm + warned} />
       {(moon || night || day < 0.4) && <Stars radius={200} depth={40} count={moon ? 4000 : 2500} factor={4} fade speed={0.3} />}
       {moon && <Earth />}

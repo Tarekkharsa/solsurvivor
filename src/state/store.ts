@@ -10,7 +10,7 @@ import { pickMission } from '../content/goodMission'
 import { play, setSfx, startMusic, stopMusic } from '../lib/audio'
 import type { RoleId } from '../content/roles'
 
-export type Screen = 'title' | 'play' | 'lapse' | 'report' | 'end' | 'teachers'
+export type Screen = 'title' | 'intro' | 'play' | 'lapse' | 'report' | 'end' | 'teachers'
 export type Modal = 'journal' | 'badges' | 'teamcheck' | 'teamsetup' | 'code' | 'settings' | null
 
 export interface Settings {
@@ -81,6 +81,7 @@ interface State {
   endTurn: () => void
   next: () => void
   lapseDone: () => void
+  introDone: () => void
   /** The 3D base is on. Set once at startup from the device and settings. */
   view3d: boolean
   setView3d: (on: boolean) => void
@@ -94,6 +95,18 @@ interface State {
 }
 
 const emptyPlan = (): Plan => ({ units: {} })
+
+/** The opening shot plays once per session, only with the 3D view. `intro=0|1` in the URL overrides. */
+function wantIntro(view3d: boolean) {
+  const q = new URLSearchParams(location.search).get('intro')
+  if (q === '0') return false
+  if (q === '1') return true
+  try {
+    return view3d && !sessionStorage.getItem('solsurvivor.intro')
+  } catch {
+    return false
+  }
+}
 const blankProfile: Profile = { badges: [], journal: [], wins: 0, coachDone: false }
 
 /** Photos a record unlocks: finished expeditions and wonders like the blue sunset. */
@@ -135,7 +148,7 @@ export const useGame = create<State>((set, get) => ({
     const s = seed ?? pickMission(world, level).seed
     const coach = get().profile.coachDone || opts.team ? null : 0
     set({
-      screen: 'play',
+      screen: wantIntro(get().view3d) ? 'intro' : 'play',
       modal: null,
       content,
       game: createGame(content, level, s),
@@ -239,6 +252,14 @@ export const useGame = create<State>((set, get) => ({
 
   next: () => set({ screen: get().game.status === 'playing' ? 'play' : 'end' }),
   lapseDone: () => get().screen === 'lapse' && set({ screen: 'report' }),
+  introDone: () => {
+    try {
+      sessionStorage.setItem('solsurvivor.intro', '1')
+    } catch {
+      // ignore
+    }
+    if (get().screen === 'intro') set({ screen: 'play' })
+  },
   view3d: false,
   setView3d: (view3d) => set({ view3d }),
   quit: () => {

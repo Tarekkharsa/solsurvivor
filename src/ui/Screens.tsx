@@ -219,6 +219,7 @@ export function End() {
   return (
     <div className="modal-back">
       <section className={won ? 'modal end won wide' : 'modal end lost wide'} role="dialog" aria-modal="true" aria-labelledby="end-title">
+        {won && <Confetti />}
         <h2 id="end-title" tabIndex={-1} autoFocus>{won ? `🎉 ${t('won')}` : `💥 ${t('lost')}`}</h2>
         {won ? (
           <>
@@ -282,6 +283,31 @@ export function End() {
           </button>
         </div>
       </section>
+    </div>
+  )
+}
+
+const confettiColors = ['#ffd166', '#ff8a4c', '#6fdc9a', '#8fd3ff', '#d6a8ff', '#ff8b7a']
+
+function Confetti() {
+  const [pieces] = useState(() =>
+    Array.from({ length: 70 }, (_, i) => ({
+      left: Math.random() * 100,
+      delay: Math.random() * 0.8,
+      dur: 2.2 + Math.random() * 1.8,
+      color: confettiColors[i % confettiColors.length],
+      size: 6 + Math.random() * 7,
+      spin: Math.random() > 0.5 ? 1 : -1,
+    })),
+  )
+  return (
+    <div className="confetti" aria-hidden>
+      {pieces.map((p, i) => (
+        <i
+          key={i}
+          style={{ left: `${p.left}%`, animationDelay: `${p.delay}s`, animationDuration: `${p.dur}s`, background: p.color, width: p.size, height: p.size * 0.5, ['--spin' as string]: p.spin }}
+        />
+      ))}
     </div>
   )
 }

@@ -1527,3 +1527,71 @@ body[data-world='moon'] .stage {
     height: 34vh;
   }
 }
+
+/* Opening shot */
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  background: #000;
+  animation: fade 0.6s;
+}
+.intro-text {
+  position: absolute;
+  top: 12%;
+  left: 0;
+  right: 0;
+  text-align: center;
+  pointer-events: none;
+  text-shadow: 0 2px 12px #000;
+  animation: rise 1.2s 0.4s backwards;
+}
+.intro-text h2 {
+  font-size: clamp(1.8rem, 6vw, 3.2rem);
+  margin: 0.2rem 0;
+}
+.intro-kicker {
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  color: var(--accent2);
+  font-weight: 800;
+  margin: 0;
+}
+.intro-coords {
+  color: var(--muted);
+  font-size: 1.1rem;
+  margin: 0;
+}
+.intro-credit {
+  position: absolute;
+  bottom: 1rem;
+  inset-inline-start: 1rem;
+  margin: 0;
+  font-size: 0.75rem;
+  color: #ffffff99;
+}
+.intro-skip {
+  position: absolute;
+  bottom: 1rem;
+  inset-inline-end: 1rem;
+  background: #0008;
+}
+
+.confetti {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 50;
+}
+.confetti i {
+  position: absolute;
+  top: -20px;
+  border-radius: 2px;
+  animation: confetti linear forwards;
+}
+@keyframes confetti {
+  to {
+    transform: translateY(110vh) rotate(calc(var(--spin) * 720deg));
+  }
+}

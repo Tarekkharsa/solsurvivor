@@ -33,3 +33,19 @@ for (const world of ['mars', 'moon']) {
     expect(errors).toEqual([])
   })
 }
+
+for (const world of ['mars', 'moon']) {
+  test(`opening shot from orbit (${world})`, async ({ page }, info) => {
+    test.skip(info.project.name !== 'desktop', 'one browser is enough')
+    await page.goto(`/?lang=en&live=0&3d=1&intro=1&world=${world}&seed=1003&level=cadet`)
+    await page.getByRole('button', { name: /Start mission/ }).click()
+    const intro = page.getByRole('dialog', { name: world === 'mars' ? 'Jezero Crater, Mars' : 'The Moon’s south pole' })
+    await expect(intro).toBeVisible()
+    await page.waitForTimeout(2500)
+    if (shots) await page.screenshot({ path: `${shots}/${world}-intro-orbit.png` })
+    await page.waitForTimeout(4200)
+    if (shots) await page.screenshot({ path: `${shots}/${world}-intro-dive.png` })
+    await expect(intro).toHaveCount(0, { timeout: 6000 })
+    await expect(page.getByText(/Tip 1 of 4/)).toBeVisible()
+  })
+}

@@ -1,13 +1,13 @@
 // Offline: the page is network-first (so updates arrive), everything else is
 // cache-first and saved the first time it loads. Photos are fetched up front.
-const CACHE = 'solsurvivor-v1'
+const CACHE = 'solsurvivor-v2'
 const PHOTOS = ['landing', 'delta', 'wildcat', 'depot', 'rim', 'cheyava', 'flight', 'seitah', 'blue-sunset', 'moon-landing', 'malapert', 'moon-pole', 'lcross', 'aitken', 'lro-earth']
 
 self.addEventListener('install', (e) => {
   e.waitUntil(
     caches
       .open(CACHE)
-      .then((c) => c.addAll(['./', 'manifest.webmanifest', 'icon.svg', ...PHOTOS.map((p) => `photos/${p}.jpg`)]))
+      .then((c) => c.addAll(['./', 'manifest.webmanifest', 'icon.svg', ...PHOTOS.map((p) => `photos/${p}.jpg`), 'mars-globe.jpg', 'moon-globe.jpg']))
       .then(() => self.skipWaiting()),
   )
 })

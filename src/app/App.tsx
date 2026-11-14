@@ -14,6 +14,7 @@ import { Settings } from '../ui/Settings'
 import { setMood } from '../lib/audio'
 import { warning } from '../sim/engine'
 import { StageSlot } from '../ui/StageSlot'
+import { IntroOverlay } from '../ui/IntroOverlay'
 import { canDo3D } from '../lib/device'
 
 export function App() {
@@ -102,6 +103,7 @@ export function App() {
           <PlanPanel />
         </main>
       </div>
+      {screen === 'intro' && <IntroOverlay />}
       {screen === 'report' && <Report />}
       {screen === 'end' && <End />}
       <Coach />
