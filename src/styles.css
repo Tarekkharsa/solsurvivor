@@ -1900,8 +1900,20 @@ body[data-world='moon'] .sol-badge {
 }
 .site-map {
   width: 100%;
+  margin: 0;
   position: sticky;
   top: 0;
+}
+.site-map svg {
+  display: block;
+  width: 100%;
+  filter: drop-shadow(0 8px 20px #0008);
+}
+.site-map figcaption {
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin-top: 0.3rem;
+  text-align: center;
 }
 .project-list.column {
   grid-template-columns: 1fr;

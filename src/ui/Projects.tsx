@@ -57,7 +57,7 @@ export function ProjectCard({ p, thumb }: { p: Project; thumb?: string }) {
       <div className="project-foot">
         <span className="project-meta">{t('turnsPower', { count: count(p.turns), power: p.powerPerTurn })}</span>
         {(status === 'ready' || chosen) && (
-          <button className={chosen ? 'small on' : 'small'} onClick={() => toggle(p.id)} disabled={tooDear} aria-pressed={chosen}>
+          <button className={chosen ? 'small on' : 'small primary'} onClick={() => toggle(p.id)} disabled={tooDear} aria-pressed={chosen}>
             {chosen ? t('cancelProject') : t('startProject')}
           </button>
         )}

@@ -30,6 +30,12 @@
 - Mars: Viking MDIM 2.1 color mosaic, tiles from NASA Mars Trek (trek.nasa.gov), stitched at 2048×1024.
 - Moon: LRO color map from the NASA Scientific Visualization Studio CGI Moon Kit (svs.gsfc.nasa.gov/4720).
 
+## Expedition maps
+
+- Jezero Crater (`public/maps/jezero.jpg`): PIA24096, taken by the High Resolution Stereo Camera on ESA's Mars Express. Credit ESA/DLR/FU Berlin, licence CC BY-SA 3.0 IGO. Cropped to a square and resized; the cropped image is shared under the same licence.
+- Moon's south pole (`public/maps/moon-pole.jpg`): PIA00001, Clementine mosaic of the lunar south polar region. Credit NASA/JPL/USGS, public domain. Cropped to the area inside about 81°S.
+- Site positions on the Moon follow real latitudes and longitudes (Shackleton at the pole, Malapert 86°S 0°, Haworth 87.5°S 5°W, Cabeus 85.3°S 42°W). The Mars sites are placed by eye on the photo.
+
 ## Live data
 
 - Solar flares this week: NASA DONKI (api.nasa.gov); NOAA SWPC GOES X-ray flares when DONKI is down.
