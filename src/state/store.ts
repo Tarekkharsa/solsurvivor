@@ -58,6 +58,7 @@ interface State {
   skipCoach: () => void
   setChallenge: (c?: Challenge) => void
   lang: Lang
+  pickWorld: (w: Content['id']) => void
   setLanguage: (l: Lang) => void
 }
 
@@ -186,6 +187,10 @@ export const useGame = create<State>((set, get) => ({
   },
   setChallenge: (challenge) => set({ challenge }),
   lang: getLang(),
+  pickWorld: (w) => {
+    setWorldWords(w)
+    set({ content: getWorld(w, getLang()) })
+  },
   setLanguage: (l) => {
     setLang(l)
     save('lang', { lang: l })

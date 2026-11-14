@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { mars } from '../content/mars'
+import { moon } from '../content/moon'
 import { strategies } from '../content/strategies'
 import { measure } from '../content/balance'
 import { createGame, planCost, playTurn, PlanError, powerFor, previewTurn, projectStatus, replay, scheduleFor, stars } from './engine'
@@ -118,15 +119,30 @@ describe('engine', () => {
 })
 
 describe('balance', () => {
-  for (const level of ['cadet', 'commander'] as const) {
-    it(`${level}: careful play wins, skipping a safety habit often loses`, () => {
-      const careful = measure(mars, level, strategies.careful, 300)
-      expect(careful.win).toBeGreaterThanOrEqual(0.99)
-      expect(careful.stars).toBeGreaterThan(2)
-      expect(measure(mars, level, strategies['no expeditions'], 300).stars).toBeLessThan(1.5)
-      expect(measure(mars, level, strategies['never shelter'], 300).win).toBeLessThan(0.8)
-      expect(measure(mars, level, strategies['never talk to Earth'], 300).win).toBeLessThan(0.8)
-      expect(measure(mars, level, strategies['random taps'], 300).win).toBeLessThan(0.5)
-    })
-  }
+  for (const world of [mars, moon])
+    for (const level of ['cadet', 'commander'] as const) {
+      it(`${world.id} ${level}: careful play wins, skipping a safety habit often loses`, () => {
+        const careful = measure(world, level, strategies.careful, 300)
+        expect(careful.win).toBeGreaterThanOrEqual(0.97)
+        expect(careful.stars).toBeGreaterThan(2)
+        expect(measure(world, level, strategies['no expeditions'], 300).stars).toBeLessThan(1.5)
+        expect(measure(world, level, strategies['never shelter'], 300).win).toBeLessThan(0.8)
+        expect(measure(world, level, strategies['never talk to Earth'], 300).win).toBeLessThan(0.8)
+        expect(measure(world, level, strategies['random taps'], 300).win).toBeLessThan(0.5)
+      })
+    }
+})
+
+describe('worlds', () => {
+  it('the Moon keeps Mars’s meters and actions, so lessons carry over', () => {
+    expect(moon.resources.map((r) => r.id)).toEqual(mars.resources.map((r) => r.id))
+    expect(moon.actions.map((a) => [a.id, a.cost, a.maxUnits])).toEqual(mars.actions.map((a) => [a.id, a.cost, a.maxUnits]))
+  })
+
+  it('every photo a world asks for exists', async () => {
+    const { photoById } = await import('../content/photos')
+    for (const w of [mars, moon]) {
+      for (const id of [...w.projects.map((p) => p.photo), ...w.events.map((e) => e.photo)].filter(Boolean)) expect(photoById(id!), id).toBeTruthy()
+    }
+  })
 })

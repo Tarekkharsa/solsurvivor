@@ -3,7 +3,7 @@ import { photoById } from '../content/photos'
 import { downloadCertificate } from '../lib/certificate'
 import { count, fmt, isRtl, strings, t } from '../i18n'
 import { stars } from '../sim/engine'
-import type { LevelId } from '../sim/types'
+import type { Content, LevelId } from '../sim/types'
 import { challengeLink, useGame } from '../state/store'
 import { MissionChart } from './Chart'
 import { BadgeGrid, PhotoCard } from './Collections'
@@ -18,11 +18,17 @@ export function Title() {
   const profile = useGame((s) => s.profile)
   const openModal = useGame((s) => s.openModal)
   const [level, setLevel] = useState<LevelId>(challenge?.level ?? 'cadet')
+  const [world, setWorld] = useState<Content['id']>('mars')
+  const pickWorld = useGame((s) => s.pickWorld)
+  const choose = (w: Content['id']) => {
+    setWorld(w)
+    pickWorld(w)
+  }
   return (
-    <main className="title-screen">
+    <main className={`title-screen ${world}`}>
       <div className="title-card">
         <h1>
-          <span aria-hidden>🔴</span> {t('appName')}
+          <span aria-hidden>{world === 'moon' ? '🌕' : '🔴'}</span> {t('appName')}
         </h1>
         <p className="tagline">{t('tagline')}</p>
         {saved && (
@@ -39,6 +45,16 @@ export function Title() {
           </div>
         ) : (
           <>
+            <h2>{t('chooseWorld')}</h2>
+            <div className="worlds" role="radiogroup" aria-label={t('chooseWorld')}>
+              {(['mars', 'moon'] as const).map((w) => (
+                <button key={w} role="radio" aria-checked={world === w} className={world === w ? `world ${w} on` : `world ${w}`} onClick={() => choose(w)}>
+                  <span className="world-ball" aria-hidden />
+                  <strong>{t(w === 'mars' ? 'worldMarsName' : 'worldMoonName')}</strong>
+                  <span>{t(w === 'mars' ? 'worldMarsInfo' : 'worldMoonInfo')}</span>
+                </button>
+              ))}
+            </div>
             <h2>{t('chooseLevel')}</h2>
             <div className="levels" role="radiogroup" aria-label={t('chooseLevel')}>
               {(['cadet', 'commander'] as const).map((id) => {
@@ -52,7 +68,7 @@ export function Title() {
                 )
               })}
             </div>
-            <button className="primary big" onClick={() => start('mars', level)}>
+            <button className="primary big" onClick={() => start(world, level)}>
               {t('start')} 🚀
             </button>
           </>
@@ -220,7 +236,7 @@ export function End() {
                   downloadCertificate({
                     title: t('certTitle'),
                     name,
-                    body: t('certBody', { level: t(game.level), world: t('worldMars') }),
+                    body: t('certBody', { level: t(game.level), world: t(content.id === 'moon' ? 'worldMoon' : 'worldMars') }),
                     stars: n,
                     date: new Date().toLocaleDateString(),
                     rtl: isRtl(),

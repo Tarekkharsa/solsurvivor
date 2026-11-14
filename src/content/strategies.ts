@@ -34,6 +34,8 @@ function habit(h: Habits): Strategy {
     if (h.shelter && storm) {
       tap(plan, game, content, content.shelterAction)
       tap(plan, game, content, content.shelterAction)
+      // Storms come in bunches: keep listening if the air can wait.
+      if (h.listen && !last && game.resources.air > 3) tap(plan, game, content, content.forecastAction)
     }
     // Keep air and food above the margin, judged by the live preview.
     for (let guard = 0; guard < 8; guard++) {

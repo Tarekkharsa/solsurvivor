@@ -17,6 +17,10 @@ export function App() {
   const openModal = useGame((s) => s.openModal)
   const setChallenge = useGame((s) => s.setChallenge)
   const lang = useGame((s) => s.lang)
+  const world = useGame((s) => s.content.id)
+  useEffect(() => {
+    document.body.dataset.world = world
+  }, [world])
   useEffect(() => setChallenge(readChallenge(location.search)), [setChallenge])
   const modals = (
     <>
@@ -65,6 +69,10 @@ export function App() {
 
 function LangSwitch({ inline }: { inline?: boolean }) {
   const lang = useGame((s) => s.lang)
+  const world = useGame((s) => s.content.id)
+  useEffect(() => {
+    document.body.dataset.world = world
+  }, [world])
   const setLanguage = useGame((s) => s.setLanguage)
   return (
     <button className={inline ? 'icon-btn lang' : 'lang corner'} onClick={() => setLanguage(lang === 'ar' ? 'en' : 'ar')} lang={lang === 'ar' ? 'en' : 'ar'}>
