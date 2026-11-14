@@ -1450,3 +1450,80 @@ table.key tr.calm td {
   background: #000;
   border: 1px solid currentColor;
 }
+
+/* 3D stage */
+.stage {
+  position: relative;
+  height: min(46vh, 460px);
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: linear-gradient(#c98d60, #6b2c14);
+}
+body[data-world='moon'] .stage {
+  background: linear-gradient(#000, #333);
+}
+.stage canvas {
+  touch-action: pan-y;
+}
+.stage.lapse {
+  position: fixed;
+  inset: 0;
+  height: auto;
+  z-index: 35;
+  border-radius: 0;
+  border: none;
+}
+.stage-loading {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 120%, #ffffff22, transparent 60%);
+}
+.lapse-bar {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  background: #0b0503cc;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.4rem 0.5rem 0.4rem 1.1rem;
+  backdrop-filter: blur(6px);
+}
+.lapse-progress {
+  width: 140px;
+  height: 6px;
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--amber), var(--sky)) 0 0 / 0% 100% no-repeat, #ffffff22;
+  animation: fill linear forwards;
+}
+@keyframes fill {
+  to {
+    background-size: 100% 100%, auto;
+  }
+}
+.pop3d {
+  display: flex;
+  gap: 0.2rem;
+  animation: popUp 0.5s ease-out;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.pop3d .chip {
+  font-size: 1rem;
+  box-shadow: 0 4px 12px #0008;
+}
+@keyframes popUp {
+  from {
+    transform: translateY(16px) scale(0.6);
+    opacity: 0;
+  }
+}
+@media (max-width: 700px) {
+  .stage {
+    height: 34vh;
+  }
+}

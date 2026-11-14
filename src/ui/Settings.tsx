@@ -1,8 +1,8 @@
-import { t } from '../i18n'
-import { useGame, type Settings as S } from '../state/store'
+import { t, tk } from '../i18n'
+import { useGame } from '../state/store'
 import { Dialog } from './Collections'
 
-const rows: { key: keyof S; label: Parameters<typeof t>[0]; how?: Parameters<typeof t>[0]; icon: string }[] = [
+const rows: { key: 'sound' | 'music' | 'readAloud' | 'contrast'; label: Parameters<typeof t>[0]; how?: Parameters<typeof t>[0]; icon: string }[] = [
   { key: 'sound', label: 'setSound', icon: '🔊' },
   { key: 'music', label: 'setMusic', icon: '🎵' },
   { key: 'readAloud', label: 'setRead', how: 'setReadHow', icon: '🗣️' },
@@ -28,6 +28,20 @@ export function Settings() {
             </button>
           </li>
         ))}
+        <li>
+          <span aria-hidden>🖥️</span>
+          <div>
+            <strong id="set-gfx">{t('setGraphics')}</strong>
+            <small>{t('setGraphicsHow')}</small>
+            <div className="seg" role="radiogroup" aria-labelledby="set-gfx">
+              {(['auto', '3d', 'simple'] as const).map((g) => (
+                <button key={g} role="radio" aria-checked={settings.graphics === g} className={settings.graphics === g ? 'on' : ''} onClick={() => set('graphics', g)}>
+                  {tk(`gfx_${g}`)}
+                </button>
+              ))}
+            </div>
+          </div>
+        </li>
       </ul>
     </Dialog>
   )

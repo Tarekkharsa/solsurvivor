@@ -13,6 +13,8 @@ import { Teachers } from '../ui/Teachers'
 import { Settings } from '../ui/Settings'
 import { setMood } from '../lib/audio'
 import { warning } from '../sim/engine'
+import { StageSlot } from '../ui/StageSlot'
+import { canDo3D } from '../lib/device'
 
 export function App() {
   const screen = useGame((s) => s.screen)
@@ -35,6 +37,12 @@ export function App() {
     document.documentElement.classList.toggle('contrast', contrast)
   }, [contrast])
   const content = useGame((s) => s.content)
+  const graphics = useGame((s) => s.settings.graphics)
+  const view3d = useGame((s) => s.view3d)
+  const setView3d = useGame((s) => s.setView3d)
+  useEffect(() => {
+    setView3d(graphics === '3d' || (graphics === 'auto' && canDo3D()))
+  }, [graphics, setView3d])
   // Music turns tense when a storm is coming or dust is on the panels.
   useEffect(() => {
     const storm = warning(game, content)
@@ -71,7 +79,7 @@ export function App() {
       <a className="skip" href="#plan">
         {t('skipToPlan')}
       </a>
-      <div className="behind" inert={screen !== 'play' || !!modal}>
+      <div className="behind" inert={(screen !== 'play' && screen !== 'lapse') || !!modal}>
         <header className="topbar">
           <button className="link" onClick={quit} aria-label={t('quit')}>
             ✕
@@ -90,6 +98,7 @@ export function App() {
         <main className="play">
           <Meters />
           <Morning />
+          {view3d && <StageSlot />}
           <PlanPanel />
         </main>
       </div>

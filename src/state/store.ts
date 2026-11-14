@@ -10,7 +10,7 @@ import { pickMission } from '../content/goodMission'
 import { play, setSfx, startMusic, stopMusic } from '../lib/audio'
 import type { RoleId } from '../content/roles'
 
-export type Screen = 'title' | 'play' | 'report' | 'end' | 'teachers'
+export type Screen = 'title' | 'play' | 'lapse' | 'report' | 'end' | 'teachers'
 export type Modal = 'journal' | 'badges' | 'teamcheck' | 'teamsetup' | 'code' | 'settings' | null
 
 export interface Settings {
@@ -18,8 +18,9 @@ export interface Settings {
   music: boolean
   readAloud: boolean
   contrast: boolean
+  graphics: 'auto' | '3d' | 'simple'
 }
-const defaultSettings: Settings = { sound: true, music: true, readAloud: false, contrast: false }
+const defaultSettings: Settings = { sound: true, music: true, readAloud: false, contrast: false, graphics: 'auto' }
 const initialSettings = load('settings', defaultSettings)
 setSfx(initialSettings.sound)
 
@@ -79,6 +80,10 @@ interface State {
   repeatPlan: () => void
   endTurn: () => void
   next: () => void
+  lapseDone: () => void
+  /** The 3D base is on. Set once at startup from the device and settings. */
+  view3d: boolean
+  setView3d: (on: boolean) => void
   quit: () => void
   openModal: (m: Modal) => void
   skipCoach: () => void
@@ -229,10 +234,13 @@ export const useGame = create<State>((set, get) => ({
     save('profile', nextProfile)
     const hit = content.events.find((e) => e.id === record.event)
     play(after.status === 'won' ? 'win' : after.status === 'lost' ? 'lose' : hit?.kind === 'solar' ? 'storm' : newPhotos.length ? 'photo' : record.finished.length || hit?.kind === 'good' ? 'good' : hit ? 'bad' : 'tap')
-    set({ game: after, plans: allPlans, plan: emptyPlan(), last: record, screen: 'report', modal: null, profile: nextProfile, fresh, coach: null, saved: undefined })
+    set({ game: after, plans: allPlans, plan: emptyPlan(), last: record, screen: get().view3d ? 'lapse' : 'report', modal: null, profile: nextProfile, fresh, coach: null, saved: undefined })
   },
 
   next: () => set({ screen: get().game.status === 'playing' ? 'play' : 'end' }),
+  lapseDone: () => get().screen === 'lapse' && set({ screen: 'report' }),
+  view3d: false,
+  setView3d: (view3d) => set({ view3d }),
   quit: () => {
     const { game, content, plans } = get()
     const saved = game.status === 'playing' && plans.length ? { world: content.id, level: game.level, seed: game.seed, plans, team: get().team, classMission: get().classMission } : undefined
