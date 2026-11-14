@@ -24,8 +24,10 @@ export function Title() {
   const openModal = useGame((s) => s.openModal)
   const modal = useGame((s) => s.modal)
   const setScreen = useGame((s) => s.setScreen)
-  const [level, setLevel] = useState<LevelId>(challenge?.level ?? 'cadet')
-  const [world, setWorld] = useState<Content['id']>('mars')
+  // `world=` and `level=` in the URL preselect the choices.
+  const q = new URLSearchParams(location.search)
+  const [level, setLevel] = useState<LevelId>(challenge?.level ?? (q.get('level') === 'commander' ? 'commander' : 'cadet'))
+  const [world, setWorld] = useState<Content['id']>(() => useGame.getState().content.id)
   const pickWorld = useGame((s) => s.pickWorld)
   const choose = (w: Content['id']) => {
     setWorld(w)

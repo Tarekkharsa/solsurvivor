@@ -95,6 +95,7 @@ interface State {
 }
 
 const emptyPlan = (): Plan => ({ units: {} })
+const urlWorld = (): Content['id'] => (typeof location !== 'undefined' && new URLSearchParams(location.search).get('world') === 'moon' ? 'moon' : 'mars')
 
 /** The opening shot plays once per session, only with the 3D view. `intro=0|1` in the URL overrides. */
 function wantIntro(view3d: boolean) {
@@ -120,7 +121,7 @@ function photosFrom(record: TurnRecord, content: Content): string[] {
 export const useGame = create<State>((set, get) => ({
   screen: 'title',
   modal: null,
-  content: getWorld('mars', getLang()),
+  content: getWorld(urlWorld(), getLang()),
   game: createGame(getWorld('mars', getLang()), 'cadet', 1),
   plan: emptyPlan(),
   plans: [],
@@ -145,7 +146,8 @@ export const useGame = create<State>((set, get) => ({
   start: (world, level, seed, opts = {}) => {
     const content = getWorld(world, getLang())
     setWorldWords(world)
-    const s = seed ?? pickMission(world, level).seed
+    const preset = presetSeed()
+    const s = seed ?? preset ?? pickMission(world, level).seed
     const coach = get().profile.coachDone || opts.team ? null : 0
     set({
       screen: wantIntro(get().view3d) ? 'intro' : 'play',
@@ -309,11 +311,20 @@ export function challengeLink(game: Game, content: Content): string {
   return url.toString()
 }
 
+/** `seed=` in the URL picks the first mission (for demos and tests). With `beat=` it is a challenge instead. */
+let presetUsed = false
+function presetSeed(): number | undefined {
+  if (presetUsed) return undefined
+  presetUsed = true
+  const n = Number(new URLSearchParams(location.search).get('seed'))
+  return Number.isInteger(n) && n >= 1000 ? n : undefined
+}
+
 export function readChallenge(search: string): Challenge | undefined {
   const q = new URLSearchParams(search)
   const seed = Number(q.get('seed'))
   const world = q.get('world') === 'moon' ? 'moon' : 'mars'
   const level = q.get('level') === 'commander' ? 'commander' : 'cadet'
-  if (!q.has('seed') || !Number.isInteger(seed) || seed <= 0) return undefined
+  if (!q.has('seed') || !q.has('beat') || !Number.isInteger(seed) || seed <= 0) return undefined
   return { world, level, seed, stars: Math.max(0, Math.min(3, Number(q.get('beat')) || 0)) }
 }
