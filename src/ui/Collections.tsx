@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { badges } from '../content/badges'
 import { photoById, photos } from '../content/photos'
 import { photoTitle } from '../content'
@@ -10,8 +10,10 @@ export function Dialog({ title, onClose, children, className = '' }: { title: st
   const ref = useRef<HTMLElement>(null)
   const closeRef = useRef(onClose)
   closeRef.current = onClose
+  // Remember the opener now: once the page behind turns inert, focus has already left it.
+  const [opener] = useState(() => document.activeElement as HTMLElement | null)
   useEffect(() => {
-    const back = document.activeElement as HTMLElement | null
+    const back = opener
     ref.current?.querySelector<HTMLElement>('button, [href], input')?.focus()
     const key = (e: KeyboardEvent) => {
       if (e.key === 'Escape') closeRef.current()

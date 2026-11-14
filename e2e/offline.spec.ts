@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, test } from './test'
 
 test('the built game works offline after one visit', async ({ page, context }, info) => {
   test.skip(info.project.name !== 'desktop', 'one browser is enough')

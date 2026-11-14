@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from './test'
 import { mars } from '../src/content/mars'
 import { strategies } from '../src/content/strategies'
 import { createGame, playTurn, stars } from '../src/sim/engine'
