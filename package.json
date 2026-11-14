@@ -9,7 +9,9 @@
     "preview": "vite preview",
     "test": "vitest run",
     "typecheck": "tsc -p .",
-    "balance": "tsx scripts/balance.ts"
+    "balance": "tsx scripts/balance.ts",
+    "package": "sh scripts/package.sh",
+    "e2e": "playwright test"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.9",

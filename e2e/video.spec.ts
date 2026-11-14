@@ -86,18 +86,22 @@ test('record the demo video', async ({}, info) => {
   rmSync(work, { recursive: true, force: true })
   mkdirSync(work, { recursive: true })
 
-  const browser = await chromium.launch({ channel: 'chrome' })
-  const context = await browser.newContext({ viewport: { width: W, height: H }, recordVideo: { dir: work, size: { width: W, height: H } }, baseURL: 'http://localhost:5190' })
+  // A real 1.5x screen: the page lays out like 1280×720 and records sharp at 1080p.
+  const browser = await chromium.launch({ channel: 'chrome', args: ['--force-device-scale-factor=1.5', '--window-size=1280,807'] })
+  const context = await browser.newContext({
+    viewport: null,
+    deviceScaleFactor: undefined,
+    isMobile: undefined,
+    hasTouch: undefined,
+    recordVideo: { dir: work, size: { width: W, height: H } },
+    baseURL: 'http://localhost:5190',
+  })
   await context.addInitScript(() => {
     try {
       localStorage.setItem('solsurvivor.settings', JSON.stringify({ graphics: '3d', music: false, sound: false }))
     } catch {
       // ignore
     }
-    // Lay the page out like a 1280×720 screen, drawn sharp at 1080p.
-    document.addEventListener('DOMContentLoaded', () => {
-      document.documentElement.style.zoom = '1.5'
-    })
   })
   const page = await context.newPage()
   const t0 = Date.now()
@@ -139,10 +143,15 @@ test('record the demo video', async ({}, info) => {
         await more(a.id).click()
         await page.waitForTimeout(game.turn === 1 || warned ? 260 : 60)
       }
-      if (game.turn === 1 && a.id === 'greenhouse') await mark('preview')
+    }
+    if (game.turn === 1) {
+      // Show the meters with their striped previews.
+      await page.evaluate(() => scrollTo({ top: 0 }))
+      await page.waitForTimeout(300)
+      await mark('preview')
+      await page.waitForTimeout(2600)
     }
     if (plan.start) await page.locator(`[data-project="${plan.start}"] button`).click()
-    if (game.turn === 1) await page.waitForTimeout(900)
     await page.locator('[data-coach="end"]').click()
     const next = playTurn(game, mars, plan).game
     const hit = mars.events.find((e) => e.id === next.history.at(-1)!.event)
@@ -246,7 +255,7 @@ test('record the demo video', async ({}, info) => {
     const part = join(work, `part-${i}.mp4`)
     ff([
       '-ss', at.toFixed(2), '-t', len.toFixed(2), '-i', raw, '-loop', '1', '-t', len.toFixed(2), '-i', join(work, `cap-${m}.png`),
-      '-filter_complex', `[0:v]scale=${W}:${H},fps=30,format=yuv420p[v];[1:v]format=rgba,fade=in:st=0:d=0.25:alpha=1[c];[v][c]overlay=0:H-h:shortest=1,fade=in:st=0:d=0.2,fade=out:st=${(len - 0.2).toFixed(2)}:d=0.2`,
+      '-filter_complex', `[0:v]scale=${W}:${H},fps=30,format=yuv420p[v];[1:v]scale=${W}:-1,format=rgba,fade=in:st=0:d=0.25:alpha=1[c];[v][c]overlay=0:H-h:shortest=1,fade=in:st=0:d=0.2,fade=out:st=${(len - 0.2).toFixed(2)}:d=0.2`,
       '-an', '-c:v', 'libx264', '-preset', 'medium', '-crf', '20', part,
     ])
     parts.push(part)

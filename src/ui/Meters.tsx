@@ -1,4 +1,7 @@
-import { fmt, t } from '../i18n'
+import { fmt, isRtl, t } from '../i18n'
+
+/** Points from now to the end of the sol, in reading direction. */
+const arrow = () => (isRtl() ? ' ← ' : ' → ')
 import { useGame, usePreview } from '../state/store'
 import type { Resource } from '../sim/types'
 
@@ -34,7 +37,7 @@ function Meter({ r }: { r: Resource }) {
           <bdi dir="ltr">{fmt(now)}</bdi>
           {delta !== 0 && (
             <span className={(r.invert ? !up : up) ? 'meter-arrow good' : 'meter-arrow bad'}>
-              {' → '}
+              {arrow()}
               <bdi dir="ltr">{fmt(next)}</bdi>
             </span>
           )}
@@ -74,7 +77,7 @@ export function Meters() {
             <bdi dir="ltr">{fmt(have)}</bdi>
             {next !== have && (
               <span className={next > have ? 'meter-arrow good' : 'meter-arrow bad'}>
-                {' → '}
+                {arrow()}
                 <bdi dir="ltr">{fmt(next)}</bdi>
               </span>
             )}
