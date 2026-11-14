@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { badges } from '../content/badges'
 import { photoById, photos } from '../content/photos'
-import { photoTitle } from '../content'
+import { getWorld, photoTitle } from '../content'
+import type { Content } from '../sim/types'
 import { getLang, t, tk } from '../i18n'
 import { useGame } from '../state/store'
 
@@ -50,13 +51,20 @@ export function Dialog({ title, onClose, children, className = '' }: { title: st
   )
 }
 
-export function PhotoCard({ id, big }: { id: string; big?: boolean }) {
+export function PhotoCard({ id, big, onOpen }: { id: string; big?: boolean; onOpen?: () => void }) {
   const p = photoById(id)
   if (!p) return null
   const title = photoTitle(p.id, getLang(), p.title)
+  const img = <img src={p.file} alt={title} loading="lazy" />
   return (
     <figure className={big ? 'photo big' : 'photo'}>
-      <img src={p.file} alt={title} loading="lazy" />
+      {onOpen ? (
+        <button className="photo-open" onClick={onOpen}>
+          {img}
+        </button>
+      ) : (
+        img
+      )}
       <figcaption>
         {title}
         <small>
@@ -67,23 +75,66 @@ export function PhotoCard({ id, big }: { id: string; big?: boolean }) {
   )
 }
 
+/** Where each photo comes from: an expedition or a lucky event, in each world. */
+function photoSources(lang: ReturnType<typeof getLang>) {
+  const out: Record<string, { world: Content['id']; how: string; text: string }> = {}
+  for (const id of ['mars', 'moon'] as const) {
+    const w = getWorld(id, lang)
+    for (const p of w.projects) if (p.photo) out[p.photo] = { world: id, how: `${p.icon} ${p.label}`, text: p.text }
+    for (const e of w.events) if (e.photo) out[e.photo] = { world: id, how: `🍀 ${t('luckySol')}`, text: e.text }
+  }
+  return out
+}
+
 export function Journal() {
   const journal = useGame((s) => s.profile.journal)
   const close = useGame((s) => s.openModal)
+  const [open, setOpen] = useState<string | null>(null)
+  const lang = getLang()
+  const from = photoSources(lang)
+  const got = photos.filter((p) => journal.includes(p.id)).length
+  if (open) {
+    return (
+      <Dialog title={`📔 ${t('journal')}`} onClose={() => setOpen(null)} className="wide">
+        <PhotoCard id={open} big />
+        {from[open] && <p className="photo-story">{from[open].text}</p>}
+        <button className="small" onClick={() => setOpen(null)}>
+          {lang === 'ar' ? '→' : '←'} {t('allPhotos')}
+        </button>
+      </Dialog>
+    )
+  }
   return (
     <Dialog title={`📔 ${t('journal')}`} onClose={() => close(null)} className="wide">
-      {!journal.length && <p className="muted">{t('journalEmpty')}</p>}
-      <div className="photo-grid">
-        {photos.map((p) =>
-          journal.includes(p.id) ? (
-            <PhotoCard key={p.id} id={p.id} />
-          ) : (
-            <div key={p.id} className="photo locked" aria-hidden>
-              ?
-            </div>
-          ),
-        )}
+      <div className="journal-count">
+        <span>{t('journalCount', { n: got, total: photos.length })}</span>
+        <span className="journal-bar" aria-hidden>
+          <i style={{ width: `${(100 * got) / photos.length}%` }} />
+        </span>
       </div>
+      {!got && <p className="muted">{t('journalEmpty')}</p>}
+      {(['mars', 'moon'] as const).map((world) => (
+        <section key={world} className="journal-world">
+          <h3>{world === 'mars' ? `🔴 ${t('worldMarsName')}` : `🌙 ${t('worldMoonName')}`}</h3>
+          <div className="photo-grid">
+            {photos
+              .filter((p) => (from[p.id]?.world ?? 'mars') === world)
+              .map((p) =>
+                journal.includes(p.id) ? (
+                  <PhotoCard key={p.id} id={p.id} onOpen={() => setOpen(p.id)} />
+                ) : (
+                  <figure key={p.id} className="photo locked">
+                    <img src={p.file} alt="" loading="lazy" />
+                    <span className="lock" aria-hidden>
+                      🔒
+                    </span>
+                    <figcaption>{from[p.id]?.how ?? '?'}</figcaption>
+                  </figure>
+                ),
+              )}
+          </div>
+        </section>
+      ))}
     </Dialog>
   )
 }

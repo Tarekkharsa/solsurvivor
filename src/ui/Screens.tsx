@@ -6,7 +6,7 @@ import { photoById } from '../content/photos'
 import { downloadCertificate } from '../lib/certificate'
 import { count, fmt, isRtl, strings, t, tk } from '../i18n'
 import { stars } from '../sim/engine'
-import type { Content, LevelId } from '../sim/types'
+import type { Content, Game, LevelId } from '../sim/types'
 import { challengeLink, useGame } from '../state/store'
 import { MissionChart } from './Chart'
 import { BadgeGrid, PhotoCard } from './Collections'
@@ -303,6 +303,31 @@ export function Report() {
   )
 }
 
+/** The mission in five big numbers. */
+function MissionStats({ game, content }: { game: Game; content: Content }) {
+  const project = (id: string) => content.projects.find((p) => p.id === id)
+  const done = game.history.flatMap((h) => h.finished.map(project)).filter((p) => !!p)
+  const events = game.history.map((h) => content.events.find((e) => e.id === h.event))
+  const stats: [string, number, string][] = [
+    ['📅', game.history.length, t('statSols')],
+    ['☀️', events.filter((e) => e?.storm).length, t('statStorms')],
+    ['🚙', done.filter((p) => p.kind !== 'upgrade').length, t('statTrips')],
+    ['🏗️', done.filter((p) => p.kind === 'upgrade').length, t('statBuilds')],
+    ['📷', done.filter((p) => p.photo).length + events.filter((e) => e?.photo).length, t('statPhotos')],
+  ]
+  return (
+    <ul className="mission-stats">
+      {stats.map(([icon, n, label]) => (
+        <li key={label}>
+          <span aria-hidden>{icon}</span>
+          <strong>{fmt(n)}</strong>
+          <small>{label}</small>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
 export function End() {
   const content = useGame((s) => s.content)
   const game = useGame((s) => s.game)
@@ -349,6 +374,7 @@ export function End() {
         ) : (
           <p className="lost-text">{strings().lostText[game.lostOn ?? 'air']}</p>
         )}
+        <MissionStats game={game} content={content} />
         <MissionChart game={game} content={content} />
         <TeamReport />
         <Discussion />

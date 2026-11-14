@@ -931,13 +931,6 @@ button.close {
 .photo.big img {
   aspect-ratio: 16 / 9;
 }
-.photo.locked {
-  display: grid;
-  place-items: center;
-  aspect-ratio: 4 / 3.6;
-  font-size: 2.5rem;
-  color: #ffffff33;
-}
 .photo-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -2490,4 +2483,114 @@ body[data-world='moon'] .title-card.two {
 .fact-card a {
   font-size: 0.82rem;
   color: var(--sky);
+}
+
+/* Journal: progress, worlds, locked teasers, big view */
+.journal-count {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 800;
+  margin-bottom: 0.4rem;
+}
+.journal-bar {
+  flex: 1;
+  height: 10px;
+  border-radius: 999px;
+  background: #ffffff14;
+  overflow: hidden;
+}
+.journal-bar i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--amber), #ffd36b);
+  border-radius: inherit;
+}
+.journal-world h3 {
+  margin: 1rem 0 0.5rem;
+  font-size: 1rem;
+}
+.photo.locked {
+  position: relative;
+}
+.photo.locked img {
+  filter: blur(9px) grayscale(0.7) brightness(0.45);
+  transform: scale(1.12);
+}
+.photo.locked .lock {
+  position: absolute;
+  inset: 0 0 auto;
+  aspect-ratio: 4 / 3;
+  display: grid;
+  place-items: center;
+  font-size: 1.8rem;
+  opacity: 0.85;
+}
+.photo.locked figcaption {
+  position: relative;
+  color: var(--muted);
+  background: #1a0f0b;
+}
+.photo-open {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  min-height: 0;
+  background: none;
+  cursor: zoom-in;
+}
+.photo-open img {
+  transition: transform 0.25s;
+}
+.photo-open:hover img,
+.photo-open:focus-visible img {
+  transform: scale(1.04);
+}
+.photo-story {
+  line-height: 1.5;
+  margin: 0.8rem 0;
+}
+
+/* End screen: the mission in numbers */
+.mission-stats {
+  list-style: none;
+  margin: 0.6rem 0 0.9rem;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.4rem;
+}
+.mission-stats li {
+  display: grid;
+  justify-items: center;
+  gap: 0.1rem;
+  padding: 0.5rem 0.2rem;
+  border-radius: var(--radius);
+  background: #ffffff0d;
+  border: 1px solid var(--line);
+}
+.mission-stats strong {
+  font-size: 1.5rem;
+  line-height: 1.1;
+}
+.mission-stats small {
+  color: var(--muted);
+  font-size: 0.75rem;
+  text-align: center;
+}
+@media (max-width: 480px) {
+  .mission-stats {
+    gap: 0.25rem;
+  }
+  .mission-stats li {
+    padding: 0.4rem 0.1rem;
+  }
+  .mission-stats strong {
+    font-size: 1.2rem;
+  }
+  .mission-stats small {
+    font-size: 0.62rem;
+  }
 }

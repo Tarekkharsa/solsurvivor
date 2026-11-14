@@ -110,11 +110,24 @@ test('record the demo video', async ({}, info) => {
     await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))))
     marks[m] ??= (Date.now() - t0) / 1000
   }
+  /** Scroll the title card just enough that Start sits above the caption bar. */
+  const clearCaption = () =>
+    page.evaluate(() => {
+      const btn = document.querySelector('.start-btn')
+      if (!btn) return
+      const need = btn.getBoundingClientRect().bottom - (innerHeight - 118)
+      if (need <= 0) return
+      let el: HTMLElement | null = btn.parentElement
+      while (el && !(el.scrollHeight > el.clientHeight && /auto|scroll/.test(getComputedStyle(el).overflowY))) el = el.parentElement
+      ;(el ?? document.scrollingElement!).scrollBy({ top: need })
+    })
   const more = (label: string) => page.locator(`[data-coach="${label}"] .stepper button`).last()
 
   await page.goto(`/?lang=${LANG}&3d=1&intro=1&world=mars&level=cadet&seed=${SEED}`)
   await page.locator('.live').waitFor({ timeout: 12000 }).catch(() => {})
   await page.waitForTimeout(800)
+  await clearCaption()
+  await page.waitForTimeout(200)
   await mark('title')
   await page.waitForTimeout(3200)
   await page.locator('.start-btn').click()
@@ -184,6 +197,8 @@ test('record the demo video', async ({}, info) => {
   await page.waitForTimeout(5000)
   await page.goto(`/?lang=${LANG}&3d=1&intro=0`)
   await page.waitForTimeout(600)
+  await clearCaption()
+  await page.waitForTimeout(200)
   await mark('end')
   await page.waitForTimeout(2600)
   const video = page.video()!
