@@ -4,6 +4,7 @@ import type { Effects } from '../sim/types'
 import { useGame, usePreview } from '../state/store'
 import { Projects } from './Projects'
 import { OwnerChip } from './Team'
+import { marsDelayMinutes, moonDelaySeconds } from '../lib/orbits'
 
 export function EffectChips({ effects }: { effects: Effects }) {
   const content = useGame((s) => s.content)
@@ -136,6 +137,14 @@ export function PlanPanel() {
                   </span>
                 </div>
                 <p className="action-explain">{a.explain}</p>
+                {a.id === content.forecastAction && (
+                  <p className="action-live">
+                    📡{' '}
+                    {content.id === 'moon'
+                      ? t('signalDelayMoon', { n: Math.round(moonDelaySeconds() * 10) / 10 })
+                      : t('signalDelay', { n: Math.round(marsDelayMinutes() * 10) / 10 })}
+                  </p>
+                )}
                 <p className="action-effects">
                   <EffectChips effects={a.perUnit} />
                   {a.delayed && (

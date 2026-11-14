@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { speak } from '../lib/audio'
+import { getLang } from '../i18n'
 import { photoById } from '../content/photos'
 import { downloadCertificate } from '../lib/certificate'
 import { count, fmt, isRtl, strings, t } from '../i18n'
@@ -10,6 +12,7 @@ import { BadgeGrid, PhotoCard } from './Collections'
 import { EffectChips } from './PlanPanel'
 import { TeamReport, TeamSetup } from './Team'
 import { CodeEntry, Discussion } from './ClassMission'
+import { LiveSun } from './Live'
 
 export function Title() {
   const content = useGame((s) => s.content)
@@ -35,6 +38,7 @@ export function Title() {
           <span aria-hidden>{world === 'moon' ? '🌕' : '🔴'}</span> {t('appName')}
         </h1>
         <p className="tagline">{t('tagline')}</p>
+        <LiveSun />
         {saved && (
           <button className="big resume" onClick={resume}>
             ▶ {t('resume', { n: saved.plans.length + 1 })}
@@ -115,6 +119,10 @@ export function Report() {
     (source === 'needs' ? '🧑‍🚀' : source === 'harvest' ? '🧺' : '🔧')
   const shelter = record.plan.units[content.shelterAction] ?? 0
   const blocked = event?.storm ? Math.min(event.storm.dose, shelter * event.storm.shelterBlock) : 0
+  const readAloud = useGame((s) => s.settings.readAloud)
+  useEffect(() => {
+    if (readAloud && event) speak(`${event.title}. ${event.text}`, getLang())
+  }, [readAloud, event])
   const photosNow = [...record.finished.map((id) => content.projects.find((p) => p.id === id)?.photo), event?.photo].filter(
     (p): p is string => !!p && !!photoById(p),
   )

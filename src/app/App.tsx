@@ -10,6 +10,9 @@ import { PlanPanel } from '../ui/PlanPanel'
 import { End, Report, Title } from '../ui/Screens'
 import { TeamCheck } from '../ui/Team'
 import { Teachers } from '../ui/Teachers'
+import { Settings } from '../ui/Settings'
+import { setMood } from '../lib/audio'
+import { warning } from '../sim/engine'
 
 export function App() {
   const screen = useGame((s) => s.screen)
@@ -27,12 +30,24 @@ export function App() {
     document.body.dataset.world = world
   }, [world])
   useEffect(() => setChallenge(readChallenge(location.search)), [setChallenge])
+  const contrast = useGame((s) => s.settings.contrast)
+  useEffect(() => {
+    document.documentElement.classList.toggle('contrast', contrast)
+  }, [contrast])
+  const content = useGame((s) => s.content)
+  // Music turns tense when a storm is coming or dust is on the panels.
+  useEffect(() => {
+    const storm = warning(game, content)
+    const dust = game.powerMods.some((m) => m.turn === game.turn && m.delta < 0)
+    setMood(storm || dust ? 'tense' : 'calm')
+  }, [game, content])
 
   const modals = (
     <>
       {modal === 'journal' && <Journal />}
       {modal === 'badges' && <Badges />}
       {modal === 'teamcheck' && <TeamCheck />}
+      {modal === 'settings' && <Settings />}
     </>
   )
 
@@ -40,7 +55,12 @@ export function App() {
   if (screen === 'title')
     return (
       <>
-        <LangSwitch key={`l${lang}`} />
+        <div className="corner-tools" key={`l${lang}`}>
+          <LangSwitch inline />
+          <button className="icon-btn" onClick={() => openModal('settings')} aria-label={t('settings')}>
+            ⚙️
+          </button>
+        </div>
         <Title key={lang} />
         {modals}
       </>
@@ -63,6 +83,9 @@ export function App() {
           <button className="icon-btn" onClick={() => openModal('journal')} aria-label={t('journal')}>
             📔
           </button>
+          <button className="icon-btn" onClick={() => openModal('settings')} aria-label={t('settings')}>
+            ⚙️
+          </button>
         </header>
         <main className="play">
           <Meters />
@@ -82,7 +105,7 @@ function LangSwitch({ inline }: { inline?: boolean }) {
   const lang = useGame((s) => s.lang)
   const setLanguage = useGame((s) => s.setLanguage)
   return (
-    <button className={inline ? 'icon-btn lang' : 'lang corner'} onClick={() => setLanguage(lang === 'ar' ? 'en' : 'ar')} lang={lang === 'ar' ? 'en' : 'ar'}>
+    <button className={inline ? 'icon-btn lang' : 'lang'} onClick={() => setLanguage(lang === 'ar' ? 'en' : 'ar')} lang={lang === 'ar' ? 'en' : 'ar'}>
       {lang === 'ar' ? 'English' : 'عربي'}
     </button>
   )

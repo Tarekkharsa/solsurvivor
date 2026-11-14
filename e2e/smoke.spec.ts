@@ -58,3 +58,12 @@ test('the Moon: days instead of sols, in English and Arabic', async ({ page }, i
   await expect(page.getByText('اليوم 1 من 10')).toBeVisible()
   await expect(page.locator('[data-project="landing"]')).toContainText('منطقة الهبوط')
 })
+
+test('live solar flares appear on the title when online', async ({ page }, info) => {
+  test.skip(info.project.name !== 'desktop', 'one browser is enough')
+  await page.goto('/?lang=en')
+  const card = page.getByRole('complementary', { name: 'Live from the Sun' })
+  await expect(card).toBeVisible({ timeout: 15000 })
+  await expect(card).toContainText(/Live data: (NASA DONKI|NOAA GOES)/)
+  if (shots) await page.screenshot({ path: `${shots}/${info.project.name}-title-live.png` })
+})

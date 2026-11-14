@@ -8,11 +8,13 @@ import { useGame } from '../state/store'
 /** A dialog that takes focus, keeps Tab inside and closes on Escape. */
 export function Dialog({ title, onClose, children, className = '' }: { title: string; onClose: () => void; children: React.ReactNode; className?: string }) {
   const ref = useRef<HTMLElement>(null)
+  const closeRef = useRef(onClose)
+  closeRef.current = onClose
   useEffect(() => {
     const back = document.activeElement as HTMLElement | null
     ref.current?.querySelector<HTMLElement>('button, [href], input')?.focus()
     const key = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape') closeRef.current()
       if (e.key !== 'Tab' || !ref.current) return
       const f = [...ref.current.querySelectorAll<HTMLElement>('button:not(:disabled), [href], input')]
       if (!f.length) return
@@ -27,9 +29,10 @@ export function Dialog({ title, onClose, children, className = '' }: { title: st
     addEventListener('keydown', key)
     return () => {
       removeEventListener('keydown', key)
-      back?.focus?.()
+      // After the page behind stops being inert.
+      requestAnimationFrame(() => back?.focus?.())
     }
-  }, [onClose])
+  }, [])
   return (
     <div className="modal-back" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <section ref={ref} className={`modal ${className}`} role="dialog" aria-modal="true" aria-label={title}>

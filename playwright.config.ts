@@ -7,7 +7,10 @@ export default defineConfig({
   workers: 1,
   timeout: 60_000,
   use: { baseURL: 'http://localhost:5190', channel: 'chrome' },
-  webServer: { command: 'npx vite --port 5190 --strictPort', url: 'http://localhost:5190', reuseExistingServer: true },
+  webServer: [
+    { command: 'npx vite --port 5190 --strictPort', url: 'http://localhost:5190', reuseExistingServer: true },
+    { command: 'npx vite build && npx vite preview --port 5191 --strictPort', url: 'http://localhost:5191', reuseExistingServer: true, timeout: 120_000 },
+  ],
   projects: [
     { name: 'desktop', use: { viewport: { width: 1280, height: 800 } } },
     { name: 'phone', use: { ...devices['Pixel 7'], channel: 'chrome' } },

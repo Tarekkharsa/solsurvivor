@@ -7,10 +7,21 @@ import { createGame, playTurn, powerLeft, previewTurn, projectStatus, replay, st
 import type { Content, Game, LevelId, Plan, TurnRecord } from '../sim/types'
 import { drop, load, save } from '../lib/save'
 import { pickMission } from '../content/goodMission'
+import { play, setSfx, startMusic, stopMusic } from '../lib/audio'
 import type { RoleId } from '../content/roles'
 
 export type Screen = 'title' | 'play' | 'report' | 'end' | 'teachers'
-export type Modal = 'journal' | 'badges' | 'teamcheck' | 'teamsetup' | 'code' | null
+export type Modal = 'journal' | 'badges' | 'teamcheck' | 'teamsetup' | 'code' | 'settings' | null
+
+export interface Settings {
+  sound: boolean
+  music: boolean
+  readAloud: boolean
+  contrast: boolean
+}
+const defaultSettings: Settings = { sound: true, music: true, readAloud: false, contrast: false }
+const initialSettings = load('settings', defaultSettings)
+setSfx(initialSettings.sound)
 
 export interface Profile {
   badges: string[]
@@ -58,6 +69,8 @@ interface State {
   saved?: SavedMission
   team?: RoleId[][]
   classMission: boolean
+  settings: Settings
+  setSetting: <K extends keyof Settings>(k: K, v: Settings[K]) => void
   start: (world: Content['id'], level: LevelId, seed?: number, opts?: StartOptions) => void
   setScreen: (s: Screen) => void
   resume: () => void
@@ -103,6 +116,14 @@ export const useGame = create<State>((set, get) => ({
 
   team: undefined,
   classMission: false,
+  settings: initialSettings,
+  setSetting: (k, v) => {
+    const settings = { ...get().settings, [k]: v }
+    save('settings', settings)
+    setSfx(settings.sound)
+    if (k === 'music') (v && get().screen !== 'title' ? startMusic() : stopMusic())
+    set({ settings })
+  },
   start: (world, level, seed, opts = {}) => {
     const content = getWorld(world, getLang())
     setWorldWords(world)
@@ -122,8 +143,13 @@ export const useGame = create<State>((set, get) => ({
       classMission: !!opts.classMission,
     })
     save('mission', { world, level, seed: s, plans: [], team: opts.team, classMission: opts.classMission })
+    play('start')
+    if (get().settings.music) startMusic()
   },
-  setScreen: (screen) => set({ screen, modal: null }),
+  setScreen: (screen) => {
+    if (screen === 'title' || screen === 'teachers') stopMusic()
+    set({ screen, modal: null })
+  },
 
   resume: () => {
     const s = get().saved
@@ -132,6 +158,7 @@ export const useGame = create<State>((set, get) => ({
     setWorldWords(s.world)
     const game = replay(content, s.level, s.seed, s.plans)
     set({ screen: game.status === 'playing' ? 'play' : 'end', content, game, plans: s.plans, plan: emptyPlan(), coach: null, fresh: { badges: [], photos: [] }, team: s.team, classMission: !!s.classMission })
+    if (get().settings.music && game.status === 'playing') startMusic()
   },
 
   setUnits: (id, units) => {
@@ -141,6 +168,7 @@ export const useGame = create<State>((set, get) => ({
     const next: Plan = { ...plan, units: { ...plan.units, [id]: Math.max(0, Math.min(a.maxUnits, units)) } }
     if (!next.units[id]) delete next.units[id]
     if (powerLeft(next, game, content) < 0) return
+    play(units > (plan.units[id] ?? 0) ? 'tap' : 'undo')
     set({ plan: next })
     // The guided first sol moves on when the step is done.
     const c = get().coach
@@ -199,6 +227,8 @@ export const useGame = create<State>((set, get) => ({
     }
     if (coach !== null) nextProfile = { ...nextProfile, coachDone: true }
     save('profile', nextProfile)
+    const hit = content.events.find((e) => e.id === record.event)
+    play(after.status === 'won' ? 'win' : after.status === 'lost' ? 'lose' : hit?.kind === 'solar' ? 'storm' : newPhotos.length ? 'photo' : record.finished.length || hit?.kind === 'good' ? 'good' : hit ? 'bad' : 'tap')
     set({ game: after, plans: allPlans, plan: emptyPlan(), last: record, screen: 'report', modal: null, profile: nextProfile, fresh, coach: null, saved: undefined })
   },
 
@@ -206,6 +236,7 @@ export const useGame = create<State>((set, get) => ({
   quit: () => {
     const { game, content, plans } = get()
     const saved = game.status === 'playing' && plans.length ? { world: content.id, level: game.level, seed: game.seed, plans, team: get().team, classMission: get().classMission } : undefined
+    stopMusic()
     set({ screen: 'title', modal: null, saved })
   },
   openModal: (modal) => set({ modal }),
