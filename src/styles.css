@@ -1058,8 +1058,23 @@ button.close {
   .meter-label {
     font-size: 0.9rem;
   }
-  .actions {
-    grid-template-columns: 1fr;
+  .actions,
+  .project-list {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 82%;
+    grid-template-columns: none;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+    padding-bottom: 0.4rem;
+    margin-inline: -0.9rem;
+    padding-inline: 0.9rem;
+    scroll-padding-inline: 0.9rem;
+  }
+  .action,
+  .project {
+    scroll-snap-align: start;
   }
   .dock-top {
     position: sticky;
@@ -1594,4 +1609,10 @@ body[data-world='moon'] .stage {
   to {
     transform: translateY(110vh) rotate(calc(var(--spin) * 720deg));
   }
+}
+/* Grid children may shrink, so swipe rows scroll inside the page instead of widening it. */
+.play > *,
+.dock,
+.projects {
+  min-width: 0;
 }

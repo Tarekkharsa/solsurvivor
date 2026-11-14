@@ -19,7 +19,7 @@ function spotFor(source: string, content: Content): Vec {
   if (source === 'upgrades') return [spots.hab[0], spots.hab[1] + 1.2, spots.hab[2]]
   const p = content.projects.find((x) => x.id === source)
   if (p?.kind === 'expedition') return spots.rover
-  if (p?.kind === 'flight') return [-6, 5, 3.5]
+  if (p?.kind === 'flight') return [-6.5, 5, -4.5]
   if (p?.kind === 'upgrade') return (spots as Record<string, Vec>)[p.id] ?? spots.hab
   return spots.sky
 }
@@ -46,7 +46,7 @@ function Pop({ change, content, at }: { change: Change; content: Content; at: Ve
 /** Falling sparks: solar storm particles at night, or dust in a dust storm. */
 function Particles({ kind, on }: { kind: 'storm' | 'dust'; on: boolean }) {
   const ref = useRef<THREE.Points>(null)
-  const n = kind === 'storm' ? 500 : 900
+  const n = kind === 'storm' ? 1400 : 900
   const geo = useMemo(() => {
     const g = new THREE.BufferGeometry()
     const p = new Float32Array(n * 3)
@@ -68,7 +68,7 @@ function Particles({ kind, on }: { kind: 'storm' | 'dust'; on: boolean }) {
     const a = geo.attributes.position as THREE.BufferAttribute
     for (let i = 0; i < n; i++) {
       if (kind === 'storm') {
-        a.array[i * 3 + 1] -= dt * 14
+        a.array[i * 3 + 1] -= dt * 18
         if (a.array[i * 3 + 1] < 0) a.array[i * 3 + 1] = 30
       } else {
         a.array[i * 3] += dt * 6
@@ -82,7 +82,7 @@ function Particles({ kind, on }: { kind: 'storm' | 'dust'; on: boolean }) {
     <points ref={ref} geometry={geo}>
       <pointsMaterial
         color={kind === 'storm' ? '#9effc8' : '#c98a5a'}
-        size={kind === 'storm' ? 0.12 : 0.18}
+        size={kind === 'storm' ? 0.22 : 0.18}
         transparent
         opacity={0}
         depthWrite={false}

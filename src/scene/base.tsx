@@ -11,7 +11,7 @@ export const spots = {
   lab: [0.6, 1.5, -3.0],
   comms: [-2.6, 2.8, -2.4],
   solar: [6.2, 1.0, -2.6],
-  rover: [9, 1.2, 6],
+  rover: [-9, 1.4, 6],
   sky: [0, 6, 0],
   biggerGreenhouse: [4.4, 1.4, 3.4],
   iceDrill: [-5.2, 2.2, -0.6],
@@ -262,13 +262,13 @@ export function Rover({ out, moon }: { out: boolean; moon: boolean }) {
   const ref = useRef<THREE.Group>(null)
   useFrame(({ clock }, dt) => {
     if (!ref.current) return
-    const target = out ? new THREE.Vector3(14, 0, 9) : new THREE.Vector3(4.2, 0, 4.6)
+    const target = out ? new THREE.Vector3(-16, 0, 10) : new THREE.Vector3(-5.6, 0, 3.6)
     ref.current.position.lerp(target, Math.min(1, dt * 0.6))
     ref.current.position.y = 0.05 + (out ? Math.abs(Math.sin(clock.elapsedTime * 6)) * 0.03 : 0)
-    ref.current.lookAt(out ? 30 : 0, 0, out ? 20 : 0)
+    ref.current.lookAt(out ? -30 : -2, 0, out ? 20 : -2)
   })
   return (
-    <group ref={ref} position={[4.2, 0, 4.6]}>
+    <group ref={ref} position={[-5.6, 0, 3.6]}>
       <mesh castShadow position={[0, 0.55, 0]}>
         <boxGeometry args={[1.1, 0.35, 1.6]} />
         <meshStandardMaterial color="#f1ede6" />
@@ -306,7 +306,7 @@ export function Flyer({ on, moon }: { on: boolean; moon: boolean }) {
     } else {
       const y = on ? 4 + Math.sin(t * 1.5) * 0.4 : 0.25
       ref.current.position.y += (y - ref.current.position.y) * Math.min(1, dt * 1.5)
-      ref.current.position.x = -6 + (on ? Math.sin(t * 0.4) * 3 : 0)
+      ref.current.position.x = -6.5 + (on ? Math.sin(t * 0.4) * 3 : 0)
       if (rotor.current) rotor.current.rotation.y += dt * (on ? 40 : 0)
     }
   })
@@ -320,7 +320,7 @@ export function Flyer({ on, moon }: { on: boolean; moon: boolean }) {
       </group>
     )
   return (
-    <group ref={ref} position={[-6, 0.25, 3.5]}>
+    <group ref={ref} position={[-6.5, 0.25, -4.5]}>
       <mesh castShadow>
         <boxGeometry args={[0.35, 0.3, 0.35]} />
         <meshStandardMaterial color="#d7d2c8" />

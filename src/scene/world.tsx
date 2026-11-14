@@ -137,7 +137,9 @@ void main() {
   col += vec3(1.0, 0.92, 0.78) * smoothstep(0.9993, 0.9998, sd) * step(-0.03, s.y);
   col += vec3(1.0, 0.8, 0.6) * pow(sd, 60.0) * 0.35 * step(-0.03, s.y) * (1.0 - dust);
   // A solar storm tints the night sky.
-  col += vec3(0.1, 0.5, 0.35) * storm * pow(h, 0.6) * (1.0 - day) * 0.6;
+  // Mars auroras are real: MAVEN saw them light up the whole planet in 2017.
+  float wave = 0.5 + 0.5 * sin(d.x * 9.0 + d.z * 5.0);
+  col += mix(vec3(0.1, 0.6, 0.4), vec3(0.5, 0.2, 0.7), wave) * storm * smoothstep(0.02, 0.5, h) * (1.0 - day) * 0.9;
   gl_FragColor = vec4(col, 1.0);
 }`
 
