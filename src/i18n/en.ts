@@ -248,6 +248,7 @@ export const en = {
   stars: '{n} of 3 stars',
   nextStar: '{n} more 🔬 for the next star',
   real: 'Real: {source}',
+  realScience: 'Real NASA science:',
   madeUp: 'Made up for the game',
   sound: 'Sound',
   language: 'Language',

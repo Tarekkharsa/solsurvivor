@@ -1,3 +1,4 @@
+import { factFor } from '../content/facts'
 import { useEffect, useState } from 'react'
 import { speak } from '../lib/audio'
 import { getLang } from '../i18n'
@@ -223,6 +224,7 @@ export function Report() {
   useEffect(() => {
     if (readAloud && event) speak(`${event.title}. ${event.text}`, getLang())
   }, [readAloud, event])
+  const fact = factFor(content, record, getLang())
   const photosNow = [...record.finished.map((id) => content.projects.find((p) => p.id === id)?.photo), event?.photo].filter(
     (p): p is string => !!p && !!photoById(p),
   )
@@ -244,6 +246,16 @@ export function Report() {
             {blocked > 0 && <p className="hint good">{t('sheltered', { n: blocked })}</p>}
             <p className="source">{event.real ? t('real', { source: event.source ?? '' }) : t('madeUp')}</p>
           </div>
+        )}
+        {!event && fact && (
+          <aside className="fact-card">
+            <p>
+              <strong>🛰️ {t('realScience')}</strong> {fact.text}
+            </p>
+            <a href={fact.url} target="_blank" rel="noreferrer">
+              {fact.source}
+            </a>
+          </aside>
         )}
         {record.finished.map((id) => {
           const p = content.projects.find((x) => x.id === id)!

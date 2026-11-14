@@ -254,6 +254,7 @@ export const ar: Strings = {
   stars: '{n} من 3 نجوم',
   nextStar: 'بقي {n} 🔬 للنجمة التالية',
   real: 'حقيقي: {source}',
+  realScience: 'علم حقيقي من ناسا:',
   madeUp: 'مُختلَق للعبة',
   sound: 'الصوت',
   language: 'اللغة',
