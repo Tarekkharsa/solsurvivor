@@ -182,6 +182,7 @@ export default function Stage({ seconds, fast: wantFast }: { seconds: number; fa
   const game = useGame((s) => s.game)
   const plan = useGame((s) => s.plan)
   const screen = useGame((s) => s.screen)
+  useGame((s) => s.lang) // crew name tags follow the language
   const last = useGame((s) => s.last)
   const lapseDone = useGame((s) => s.lapseDone)
   const moon = content.id === 'moon'

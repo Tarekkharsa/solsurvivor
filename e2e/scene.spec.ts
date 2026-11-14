@@ -65,3 +65,27 @@ test('first load opens with the orbit shot, then the title', async ({ page }, in
   await page.reload()
   await expect(page.getByRole('button', { name: /Start mission/ })).toBeVisible()
 })
+
+test('one 3D stage from the title into the game, with no errors on Start, Leave, world or language changes', async ({ page }) => {
+  test.setTimeout(90_000)
+  const errors: string[] = []
+  page.on('pageerror', (e) => errors.push(e.message))
+  await page.goto('/?lang=en&live=0&3d=1&intro=0&seed=1004&world=mars&level=cadet')
+  await expect(page.locator('.stage canvas')).toBeVisible({ timeout: 20000 })
+  await page.waitForTimeout(1500)
+  const canvas = await page.locator('.stage canvas').elementHandle()
+  await page.getByRole('button', { name: /Start mission/ }).click()
+  await page.getByRole('button', { name: 'Skip tips' }).click()
+  // The same canvas carries on: the scene is not rebuilt.
+  expect(await canvas!.evaluate((c) => c.isConnected)).toBe(true)
+  await page.waitForTimeout(1000)
+  await page.getByRole('button', { name: 'عربي' }).click()
+  await page.waitForTimeout(800)
+  await page.getByRole('button', { name: 'EN' }).click()
+  await page.getByRole('button', { name: 'Leave mission' }).click()
+  await page.locator('.worlds button').nth(1).click()
+  await page.waitForTimeout(1000)
+  await page.getByRole('button', { name: /Start mission/ }).click()
+  await page.waitForTimeout(1500)
+  expect(errors).toEqual([])
+})

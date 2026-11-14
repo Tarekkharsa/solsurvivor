@@ -70,35 +70,35 @@ export function App() {
 
   if (screen === 'teachers') return <Teachers key={lang} />
   if (screen === 'intro' && useGame.getState().introNext === 'title') return <IntroOverlay />
-  if (screen === 'title')
+  // One 3D stage from the title to the end, so Start never rebuilds the scene.
+  if (view3d || screen === 'title') {
+    const title = screen === 'title'
     return (
-      <div className={view3d ? 'title-wrap with-stage' : 'title-wrap'}>
+      <div className={title ? (view3d ? 'title-wrap with-stage' : 'title-wrap') : 'game'}>
+        {!title && (
+          <a className="skip" href="#plan">
+            {t('skipToPlan')}
+          </a>
+        )}
         {view3d && <StageSlot />}
-        <Title key={lang} />
-        {modals}
-      </div>
-    )
-
-  if (view3d)
-    return (
-      <div className="game" key={lang}>
-        <a className="skip" href="#plan">
-          {t('skipToPlan')}
-        </a>
-        <StageSlot />
-        <div className="game-ui" inert={(screen !== 'play' && screen !== 'lapse') || !!modal} hidden={screen === 'lapse'}>
-          <Hud />
-          <Morning />
-          <Tips />
-          <PlanPanel inGame />
-        </div>
+        {title ? (
+          <Title key={lang} />
+        ) : (
+          <div className="game-ui" key={lang} inert={(screen !== 'play' && screen !== 'lapse') || !!modal} hidden={screen === 'lapse'}>
+            <Hud />
+            <Morning />
+            <Tips />
+            <PlanPanel inGame />
+          </div>
+        )}
         {screen === 'intro' && <IntroOverlay />}
         {screen === 'report' && <Report />}
         {screen === 'end' && <End />}
-        <Coach />
+        {!title && <Coach />}
         {modals}
       </div>
     )
+  }
 
   return (
     <div className="app" key={lang}>
