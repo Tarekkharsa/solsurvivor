@@ -1,4 +1,5 @@
-import { useId, useState } from 'react'
+import { useId, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { getLang } from '../i18n'
 
 /** Words kids may not know, with a short explanation. Tap or focus a word to see it. */
@@ -25,26 +26,37 @@ const terms: Record<'en' | 'ar', Record<string, string>> = {
 
 function Term({ word, meaning }: { word: string; meaning: string }) {
   const [open, setOpen] = useState(false)
+  const [at, setAt] = useState<DOMRect>()
+  const ref = useRef<HTMLButtonElement>(null)
   const id = useId()
+  const show = (on: boolean) => {
+    if (on) setAt(ref.current?.getBoundingClientRect())
+    setOpen(on)
+  }
   return (
     <span className="term-wrap">
       <button
+        ref={ref}
         type="button"
         className="term"
         aria-describedby={open ? id : undefined}
         aria-expanded={open}
-        onClick={() => setOpen((o) => !o)}
-        onBlur={() => setOpen(false)}
-        onMouseEnter={() => setOpen(true)}
-        onMouseLeave={() => setOpen(false)}
+        onClick={() => show(!open)}
+        onBlur={() => show(false)}
+        onMouseEnter={() => show(true)}
+        onMouseLeave={() => show(false)}
       >
         {word}
       </button>
-      {open && (
-        <span role="tooltip" id={id} className="term-tip">
-          {meaning}
-        </span>
-      )}
+      {open &&
+        at &&
+        createPortal(
+          // Floats above everything, so cards that clip their text never hide it.
+          <span role="tooltip" id={id} className="term-tip" style={{ left: Math.max(8, Math.min(innerWidth - 268, at.left)), top: at.top - 8 }}>
+            {meaning}
+          </span>,
+          document.body,
+        )}
     </span>
   )
 }

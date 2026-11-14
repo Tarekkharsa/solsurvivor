@@ -4,6 +4,7 @@ import type { Effects } from '../sim/types'
 import { useGame, usePreview } from '../state/store'
 import { Projects } from './Projects'
 import { Slots } from './ProjectsDialog'
+import { GlossaryText } from './Glossary'
 import { OwnerChip } from './Team'
 import { marsDelayMinutes, moonDelaySeconds } from '../lib/orbits'
 
@@ -138,7 +139,9 @@ export function PlanPanel({ inGame = false }: { inGame?: boolean }) {
                     {a.cost}⚡
                   </span>
                 </div>
-                <p className="action-explain">{a.explain}</p>
+                <p className="action-explain">
+                  <GlossaryText text={a.explain} />
+                </p>
                 {a.id === content.forecastAction && (
                   <p className="action-live">
                     📡{' '}

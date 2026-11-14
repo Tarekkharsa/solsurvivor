@@ -16,6 +16,7 @@ import { warning } from '../sim/engine'
 import { StageSlot } from '../ui/StageSlot'
 import { IntroOverlay } from '../ui/IntroOverlay'
 import { Hud } from '../ui/Hud'
+import { Tips } from '../ui/Tips'
 import { ProjectsDialog } from '../ui/ProjectsDialog'
 import { canDo3D } from '../lib/device'
 
@@ -88,6 +89,7 @@ export function App() {
         <div className="game-ui" inert={(screen !== 'play' && screen !== 'lapse') || !!modal} hidden={screen === 'lapse'}>
           <Hud />
           <Morning />
+          <Tips />
           <PlanPanel inGame />
         </div>
         {screen === 'intro' && <IntroOverlay />}

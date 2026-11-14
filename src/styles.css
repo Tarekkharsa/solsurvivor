@@ -2338,10 +2338,9 @@ body[data-world='moon'] .title-card.two {
   padding: 0 2px;
 }
 .term-tip {
-  position: absolute;
-  bottom: calc(100% + 6px);
-  inset-inline-start: 0;
-  z-index: 20;
+  position: fixed;
+  transform: translateY(-100%);
+  z-index: 60;
   width: max-content;
   max-width: 260px;
   background: #10324a;
@@ -2379,4 +2378,65 @@ body[data-world='moon'] .title-card.two {
 .intro-text.world h2 {
   font-family: 'Fredoka', 'Nunito', sans-serif;
   font-size: clamp(2.6rem, 8vw, 4.5rem);
+}
+
+/* Tips */
+.tip {
+  align-self: center;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  max-width: min(640px, 100%);
+  background: #10324aee;
+  border: 1px solid var(--sky);
+  border-radius: 14px;
+  padding: 0.5rem 0.6rem 0.5rem 0.9rem;
+  box-shadow: 0 8px 30px #0006;
+  animation: rise 0.3s;
+}
+.tip p {
+  margin: 0;
+  font-size: 0.95rem;
+}
+.tip button.small {
+  flex: none;
+  background: var(--sky);
+  color: #06233a;
+  border: none;
+}
+.tip button.small.ghost {
+  background: none;
+  color: #fff;
+  border: 1px solid #ffffff55;
+}
+
+/* In the 3D game, the sol report sits at the side so the base stays in view. */
+.game .modal-back:has(.report) {
+  background: linear-gradient(90deg, transparent 40%, #0b050399);
+  justify-items: end;
+  place-items: stretch end;
+  padding: 0.75rem;
+}
+:root[dir='rtl'] .game .modal-back:has(.report) {
+  background: linear-gradient(270deg, transparent 40%, #0b050399);
+}
+.game .modal.report {
+  width: min(460px, 100%);
+  max-height: calc(100vh - 1.5rem);
+  align-self: center;
+}
+@media (max-width: 700px) {
+  .tip {
+    font-size: 0.85rem;
+    flex-wrap: wrap;
+  }
+  .game .modal-back:has(.report) {
+    place-items: end stretch;
+    background: #0b050366;
+    padding: 0.4rem;
+  }
+  .game .modal.report {
+    width: 100%;
+    max-height: 70vh;
+  }
 }
