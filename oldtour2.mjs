@@ -1,0 +1,26 @@
+import { chromium } from '@playwright/test'
+const S = process.argv[2]
+const URL = 'https://tareks-mac-mini.tailf61287.ts.net/solsurvivor/'
+const b = await chromium.launch({ channel: 'chrome' })
+const ctx = await b.newContext({ viewport: { width: 1280, height: 800 } })
+const p = await ctx.newPage()
+await p.goto(URL + '?live=0&3d=1&intro=0&q=high')
+await p.waitForTimeout(2500)
+await p.screenshot({ path: `${S}/d-title.png` })
+await p.screenshot({ path: `${S}/d-title-full.png`, fullPage: true })
+await p.getByRole('button', { name: /start/i }).first().click().catch(() => {})
+await p.waitForTimeout(4000)
+await p.getByText(/skip tutorial/i).click().catch(() => {})
+for (let i = 0; i < 2; i++) await p.locator('[data-coach="oxygen"] button').last().click().catch(() => {})
+await p.locator('[data-coach="greenhouse"] button').last().click().catch(() => {})
+await p.locator('[data-coach="comms"] button').last().click().catch(() => {})
+await p.getByRole('button', { name: /Expeditions/ }).click().catch(() => {})
+await p.waitForTimeout(800)
+await p.screenshot({ path: `${S}/d-expeditions.png` })
+await p.keyboard.press('Escape')
+await p.waitForTimeout(500)
+await p.locator('[data-coach="end"]').click().catch(() => {})
+for (const t of [1500, 2500, 2500, 2500, 3000]) { await p.waitForTimeout(t); await p.screenshot({ path: `${S}/d-lapse-${t}-${Date.now() % 100000}.png` }) }
+await p.waitForTimeout(3000)
+await p.screenshot({ path: `${S}/d-after.png` })
+await b.close()

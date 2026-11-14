@@ -3,6 +3,7 @@ import { planCost, powerFor } from '../sim/engine'
 import type { Effects } from '../sim/types'
 import { useGame, usePreview } from '../state/store'
 import { Projects } from './Projects'
+import { Slots } from './ProjectsDialog'
 import { OwnerChip } from './Team'
 import { marsDelayMinutes, moonDelaySeconds } from '../lib/orbits'
 
@@ -28,7 +29,7 @@ export function EffectChips({ effects }: { effects: Effects }) {
   )
 }
 
-export function PlanPanel() {
+export function PlanPanel({ inGame = false }: { inGame?: boolean }) {
   const content = useGame((s) => s.content)
   const game = useGame((s) => s.game)
   const plan = useGame((s) => s.plan)
@@ -120,6 +121,7 @@ export function PlanPanel() {
           </button>
         </div>
       </div>
+      {inGame && <Slots />}
       <ul className="actions">
         {content.actions.map((a) => {
           const units = plan.units[a.id] ?? 0
@@ -169,7 +171,7 @@ export function PlanPanel() {
           )
         })}
       </ul>
-      <Projects />
+      {!inGame && <Projects />}
     </section>
   )
 }

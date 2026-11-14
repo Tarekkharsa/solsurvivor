@@ -1,10 +1,11 @@
 import { count, t } from '../i18n'
+import { photoById } from '../content/photos'
 import { planCost, powerFor, projectStatus } from '../sim/engine'
 import type { Project } from '../sim/types'
 import { useGame } from '../state/store'
 import { OwnerChip } from './Team'
 
-function ProjectCard({ p }: { p: Project }) {
+export function ProjectCard({ p, thumb }: { p: Project; thumb?: string }) {
   const content = useGame((s) => s.content)
   const game = useGame((s) => s.game)
   const plan = useGame((s) => s.plan)
@@ -17,6 +18,7 @@ function ProjectCard({ p }: { p: Project }) {
   const needs = p.requires?.find((r) => !game.done.includes(r))
   const reward = p.reward[content.scienceId]
   const science = content.resources.find((r) => r.id === content.scienceId)!
+  const photo = thumb ? photoById(thumb) : undefined
 
   let note = ''
   if (chosen) note = t('starting')
@@ -27,7 +29,12 @@ function ProjectCard({ p }: { p: Project }) {
   else if (status === 'poor') note = t('poor', { n: p.price! })
 
   return (
-    <article className={`project ${status} ${chosen ? 'chosen' : ''}`} data-project={p.id}>
+    <article className={`project ${status} ${chosen ? 'chosen' : ''} ${thumb ? 'with-thumb' : ''}`} data-project={p.id}>
+      {thumb && (
+        <div className="thumb" aria-hidden>
+          {status === 'done' && photo ? <img src={photo.file} alt="" /> : <span>?</span>}
+        </div>
+      )}
       <div className="project-head">
         <span className="project-icon" aria-hidden>
           {p.icon}
@@ -39,6 +46,7 @@ function ProjectCard({ p }: { p: Project }) {
             <bdi dir="ltr">+{reward}</bdi> {science.icon}
           </span>
         ) : null}
+        {thumb ? <span className="chip photo-chip">📸 {t('photoChip')}</span> : null}
         {p.price ? (
           <span className="chip price">
             <bdi dir="ltr">−{p.price}</bdi> {science.icon}

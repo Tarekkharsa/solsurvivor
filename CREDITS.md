@@ -20,6 +20,11 @@
 | Aitken basin edge (Artemis II) | art002e009283 | NASA |
 | Earth from lunar orbit | GSFC_20171208_Archive_e000496 | NASA/GSFC/Arizona State University |
 
+## 3D models
+
+- Perseverance rover and Ingenuity helicopter: NASA/JPL-Caltech, from NASA's 3D Resources
+  (science.nasa.gov/3d-resources), shrunk for the web with glTF-Transform.
+
 ## Globes
 
 - Mars: Viking MDIM 2.1 color mosaic, tiles from NASA Mars Trek (trek.nasa.gov), stitched at 2048×1024.

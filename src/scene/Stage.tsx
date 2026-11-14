@@ -1,5 +1,5 @@
 import { Html, OrbitControls, PerformanceMonitor, Stars } from '@react-three/drei'
-import { Canvas, useFrame } from '@react-three/fiber'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { fmt } from '../i18n'
@@ -8,6 +8,9 @@ import type { Change, Content } from '../sim/types'
 import { useGame } from '../state/store'
 import { Building, Comms, Crew, Flyer, Greenhouse, Hab, IceDrill, Lab, OxygenMaker, Rover, Shield, SolarPanels, spots, Walls } from './base'
 import { Earth, Ground, Rocks, Sky } from './world'
+import { Ingenuity, Perseverance } from './models'
+import { crew } from '../content/crew'
+import { isRtl } from '../i18n'
 
 type Vec = readonly [number, number, number]
 
@@ -19,7 +22,7 @@ function spotFor(source: string, content: Content): Vec {
   if (source === 'upgrades') return [spots.hab[0], spots.hab[1] + 1.2, spots.hab[2]]
   const p = content.projects.find((x) => x.id === source)
   if (p?.kind === 'expedition') return spots.rover
-  if (p?.kind === 'flight') return [-6.5, 5, -4.5]
+  if (p?.kind === 'flight') return [5.6, 4.6, -1.4]
   if (p?.kind === 'upgrade') return (spots as Record<string, Vec>)[p.id] ?? spots.hab
   return spots.sky
 }
@@ -125,6 +128,18 @@ function FogControl({ color, near, far }: { color: string; near: number; far: nu
   return null
 }
 
+/** Steps the camera back on tall, narrow screens so the whole base fits above the dock. */
+function CameraRig({ close }: { close: boolean }) {
+  const { camera, size } = useThree()
+  useEffect(() => {
+    const aspect = size.width / size.height
+    const k = (aspect < 0.8 ? 2.3 : aspect < 1.3 ? 1.6 : 1.25) * (close ? 0.78 : 1)
+    camera.position.set(11 * k, 8.5 * k, 13 * k)
+    camera.updateProjectionMatrix()
+  }, [camera, size.width, size.height, close])
+  return null
+}
+
 /** The time-lapse clock: 0 is morning, 1 is the end of the night. */
 function useLapse(active: boolean, seconds: number, onDone: () => void) {
   const [t, setT] = useState(0)
@@ -202,10 +217,11 @@ export default function Stage({ seconds, fast: wantFast }: { seconds: number; fa
     <Canvas
       shadows={!fast}
       dpr={fast ? 1 : [1, 1.75]}
-      camera={{ position: [10, 6.5, 12], fov: 42, near: 0.1, far: 800 }}
+      camera={{ position: [11, 7.5, 13], fov: 40, near: 0.1, far: 800 }}
       gl={{ antialias: !fast, powerPreference: 'high-performance' }}
       frameloop="always"
     >
+      <CameraRig close={lapse} />
       <PerformanceMonitor onDecline={() => setSlow(true)} />
       <Sky sun={sun} day={day} moon={moon} dust={dustNow ? 0.8 : 0} storm={storm + warned} />
       {(moon || night || day < 0.4) && <Stars radius={200} depth={40} count={moon ? 4000 : 2500} factor={4} fade speed={0.3} />}
@@ -217,7 +233,7 @@ export default function Stage({ seconds, fast: wantFast }: { seconds: number; fa
       <Hab />
       <OxygenMaker units={units.oxygen ?? 0} />
       <Greenhouse units={units.greenhouse ?? 0} harvest={game.pending.reduce((s, p) => s + (p.effects.food ?? 0), 0)} />
-      {done.has('biggerGreenhouse') && <Greenhouse units={1} position={[4.4, 0, 3.4]} harvest={3} />}
+      {done.has('biggerGreenhouse') && <Greenhouse units={1} position={[6.2, 0, 2.6]} harvest={3} r={1.2} />}
       <Lab units={units.lab ?? 0} />
       <Comms on={!!units[content.forecastAction]} />
       <SolarPanels extra={done.has('solar')} />
@@ -227,15 +243,15 @@ export default function Stage({ seconds, fast: wantFast }: { seconds: number; fa
         <Building key={id} at={(spots as Record<string, Vec>)[id] ?? spots.solar} />
       ))}
       <Shield units={units[content.shelterAction] ?? 0} hit={storm} />
-      <Rover out={isProject('expedition')} moon={moon} />
-      <Flyer on={isProject('flight')} moon={moon} />
-      <Crew jobs={jobs} />
+      {moon ? <Rover out={isProject('expedition')} moon /> : <Perseverance out={isProject('expedition')} />}
+      {moon ? <Flyer on={isProject('flight')} moon /> : <Ingenuity flying={isProject('flight')} />}
+      <Crew jobs={jobs} names={crew.map((c) => (isRtl() ? c.nameAr : c.name))} />
       {!fast && <Particles kind="storm" on={!!storm} />}
       {!fast && !moon && <Particles kind="dust" on={dustNow} />}
       {visible.map((c, i) => (
         <Pop key={`${c.source}${i}`} change={c} content={content} at={spotFor(c.source, content)} />
       ))}
-      <OrbitControls enablePan={false} minDistance={7} maxDistance={26} maxPolarAngle={1.4} target={[0, 1, 0]} autoRotate={lapse} autoRotateSpeed={0.6} enableDamping />
+      <OrbitControls enablePan={false} minDistance={8} maxDistance={60} maxPolarAngle={1.4} target={[0, -1.6, 1.5]} autoRotate={lapse} autoRotateSpeed={0.6} enableDamping />
     </Canvas>
   )
 }

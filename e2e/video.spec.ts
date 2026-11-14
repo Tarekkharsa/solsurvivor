@@ -151,7 +151,13 @@ test('record the demo video', async ({}, info) => {
       await mark('preview')
       await page.waitForTimeout(2600)
     }
-    if (plan.start) await page.locator(`[data-project="${plan.start}"] button`).click()
+    if (plan.start) {
+      const kind = mars.projects.find((p) => p.id === plan.start)!.kind
+      await page.locator('.slot').nth(kind === 'upgrade' ? 1 : 0).click()
+      await page.locator(`.projects-dialog [data-project="${plan.start}"] button`).click()
+      if (game.turn === 1) await page.waitForTimeout(1200)
+      await page.keyboard.press('Escape')
+    }
     await page.locator('[data-coach="end"]').click()
     const next = playTurn(game, mars, plan).game
     const hit = mars.events.find((e) => e.id === next.history.at(-1)!.event)

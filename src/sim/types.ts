@@ -78,6 +78,8 @@ export interface Project {
   text: string
   /** A discovery photo shown when it finishes. */
   photo?: string
+  /** Where it is on the expedition map, 0–100 across and down. */
+  map?: [number, number]
   real: boolean
 }
 

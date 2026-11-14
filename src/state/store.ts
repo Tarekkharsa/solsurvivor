@@ -11,7 +11,7 @@ import { play, setSfx, startMusic, stopMusic } from '../lib/audio'
 import type { RoleId } from '../content/roles'
 
 export type Screen = 'title' | 'intro' | 'play' | 'lapse' | 'report' | 'end' | 'teachers'
-export type Modal = 'journal' | 'badges' | 'teamcheck' | 'teamsetup' | 'code' | 'settings' | null
+export type Modal = 'journal' | 'badges' | 'teamcheck' | 'teamsetup' | 'code' | 'settings' | 'explore' | 'build' | null
 
 export interface Settings {
   sound: boolean

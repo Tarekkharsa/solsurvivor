@@ -1616,3 +1616,472 @@ body[data-world='moon'] .stage {
 .projects {
   min-width: 0;
 }
+
+/* ===== Full-screen game layout (3D view) ===== */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.game {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+}
+.game .stage {
+  position: absolute;
+  inset: 0;
+  height: auto;
+  border: none;
+  border-radius: 0;
+}
+.game-ui {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0.75rem;
+  pointer-events: none;
+}
+.game-ui[hidden] {
+  display: none;
+}
+.game-ui > * {
+  pointer-events: auto;
+}
+.hud {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  background: #1a0f0bd9;
+  border: 1px solid #ffffff1a;
+  border-radius: 18px;
+  padding: 0.5rem 0.8rem;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 30px #0006;
+}
+body[data-world='moon'] .hud,
+body[data-world='moon'] .game .dock,
+body[data-world='moon'] .game .morning {
+  background: #12161dd9;
+}
+.hud-sol {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex: none;
+}
+.hud-quit {
+  min-height: 36px;
+  width: 36px;
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--muted);
+}
+.sol-badge {
+  background: #8a2f12;
+  color: #ffe2cf;
+  border-radius: 999px;
+  padding: 0.15rem 0.7rem;
+  font-size: 1.05rem;
+}
+body[data-world='moon'] .sol-badge {
+  background: #2e4766;
+  color: #dbe9ff;
+}
+.sol-total {
+  color: var(--muted);
+}
+.hud-meters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.15rem 1.2rem;
+  flex: 1;
+  min-width: 0;
+}
+.hud-meter {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto auto;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+}
+.hm-icon {
+  font-size: 1.15rem;
+}
+.hm-label {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+.hud-meter .bar {
+  margin: 0;
+  height: 9px;
+  min-width: 50px;
+}
+.hm-value {
+  font-size: 1.05rem;
+  min-width: 2.2ch;
+  text-align: end;
+}
+.hm-next {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--muted);
+  background: #ffffff12;
+  border-radius: 6px;
+  padding: 0 0.35rem;
+  white-space: nowrap;
+}
+.hm-next.good {
+  color: var(--good);
+}
+.hm-next.bad {
+  color: var(--bad);
+}
+.hud-meter.danger .bar-fill {
+  background: var(--amber);
+}
+.hud-meter.fail .bar-fill {
+  background: var(--bad);
+}
+.hud-meter.invert .bar-fill {
+  background: #c9a3ff;
+}
+.hud-meter.fail {
+  animation: pulse 1s infinite;
+  border-radius: 8px;
+}
+.hud-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.1rem;
+  position: relative;
+  padding-bottom: 5px;
+}
+.hud-stars .star {
+  font-size: 1.05rem;
+}
+.star-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  border-radius: 3px;
+  background: #ffffff1f;
+  overflow: hidden;
+}
+.star-progress span {
+  display: block;
+  height: 100%;
+  background: var(--amber);
+  transition: width 0.3s;
+}
+.hud-menu {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex: none;
+}
+.hud-menu button {
+  min-height: 40px;
+  padding: 0.3rem 0.8rem;
+  background: #ffffff10;
+  border-color: #ffffff22;
+  border-radius: 12px;
+  font-weight: 700;
+}
+.hud-code {
+  border: 1px solid var(--sky);
+  color: var(--sky);
+  border-radius: 999px;
+  padding: 0.1rem 0.6rem;
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+.game .morning {
+  align-self: flex-start;
+  max-width: min(560px, 100%);
+  background: #1a0f0bd9;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 30px #0006;
+}
+.game .morning.alarm {
+  background: #4a3612ee;
+}
+.game .dock {
+  margin-top: auto;
+  background: #1a0f0be6;
+  backdrop-filter: blur(8px);
+  border-color: #ffffff1a;
+  box-shadow: 0 -8px 30px #0005;
+}
+.game .dock-top {
+  margin-bottom: 0.5rem;
+}
+.game .actions {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+.game .action {
+  grid-template-columns: 1fr;
+  grid-template-rows: auto 1fr auto;
+  align-items: start;
+  padding: 0.55rem 0.65rem;
+  position: relative;
+}
+.game .action-icon {
+  position: absolute;
+  top: 0.5rem;
+  inset-inline-start: 0.55rem;
+  font-size: 1.2rem;
+}
+.game .action-head {
+  padding-inline-start: 1.6rem;
+}
+.game .action-explain {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 0.8rem;
+}
+.game .stepper {
+  flex-direction: row;
+  justify-content: space-between;
+  margin-top: 0.3rem;
+}
+.slots {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.slot {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 12px;
+  border: 1px dashed #ffffff33;
+  background: #ffffff08;
+  text-align: start;
+  font-size: 0.92rem;
+  color: var(--muted);
+}
+.slot.invite {
+  border-style: solid;
+  border-color: var(--accent2);
+  color: var(--text);
+}
+.slot span:first-child {
+  font-size: 1.2rem;
+}
+
+/* Expeditions and build dialogs */
+.projects-dialog.wide {
+  width: min(1040px, 100%);
+}
+.projects-layout {
+  display: grid;
+  gap: 1rem;
+}
+.projects-dialog.explore .projects-layout {
+  grid-template-columns: minmax(240px, 380px) 1fr;
+  align-items: start;
+}
+.site-map {
+  width: 100%;
+  position: sticky;
+  top: 0;
+}
+.project-list.column {
+  grid-template-columns: 1fr;
+}
+.project.with-thumb {
+  display: grid;
+  grid-template-columns: 74px 1fr;
+  grid-template-areas: 'thumb head' 'thumb text' 'thumb foot';
+  column-gap: 0.75rem;
+}
+.project.with-thumb .thumb {
+  grid-area: thumb;
+  width: 74px;
+  height: 74px;
+  border-radius: 10px;
+  background: #00000055;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #ff8b7a;
+  align-self: center;
+}
+.project.with-thumb .thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.project.with-thumb .project-head {
+  grid-area: head;
+}
+.project.with-thumb .project-text {
+  grid-area: text;
+}
+.project.with-thumb .project-foot {
+  grid-area: foot;
+}
+.photo-chip {
+  background: #173a27;
+  color: var(--good);
+}
+
+@media (max-width: 900px) {
+  .hud {
+    flex-wrap: wrap;
+    gap: 0.4rem 0.6rem;
+  }
+  .hud-meters {
+    order: 3;
+    flex-basis: 100%;
+  }
+  .hud-menu {
+    margin-inline-start: auto;
+  }
+  .hud-btn-label {
+    display: none;
+  }
+  .game .actions {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 46%;
+    grid-template-columns: none;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+  }
+  .projects-dialog.explore .projects-layout {
+    grid-template-columns: 1fr;
+  }
+  .site-map {
+    position: static;
+    max-width: 340px;
+    margin: 0 auto;
+  }
+}
+@media (max-width: 700px) {
+  .game-ui {
+    padding: 0.4rem;
+    gap: 0.4rem;
+  }
+  .hud-meters {
+    gap: 0.1rem 0.7rem;
+  }
+  .hm-label {
+    display: none;
+  }
+  .hud-menu button {
+    padding: 0.2rem 0.55rem;
+    min-height: 38px;
+  }
+  .game .morning {
+    padding: 0.4rem 0.7rem;
+  }
+  .game .morning .face {
+    font-size: 1.6rem;
+  }
+  .game .morning .line {
+    font-size: 0.92rem;
+  }
+  .game .dock {
+    max-height: 52vh;
+    overflow: auto;
+    padding: 0.6rem;
+  }
+  .game .dock-top {
+    position: sticky;
+    top: -0.6rem;
+    z-index: 3;
+    margin: -0.6rem -0.6rem 0.5rem;
+    padding: 0.6rem;
+    background: #1a0f0b;
+    border-radius: 18px 18px 0 0;
+  }
+  body[data-world='moon'] .game .dock-top {
+    background: #12161d;
+  }
+  /* Phone: compact rows, like a game menu. Details are a long-press away in the simple view. */
+  .game .actions {
+    grid-auto-flow: row;
+    grid-auto-columns: auto;
+    grid-template-columns: 1fr;
+    overflow: visible;
+    gap: 0.35rem;
+  }
+  .game .action {
+    grid-template-columns: auto 1fr auto;
+    grid-template-rows: auto;
+    align-items: center;
+    padding: 0.35rem 0.5rem;
+  }
+  .game .action-icon {
+    position: static;
+    font-size: 1.5rem;
+  }
+  .game .action-head {
+    padding-inline-start: 0;
+  }
+  .game .action-explain,
+  .game .action-live {
+    display: none;
+  }
+  .game .stepper {
+    margin-top: 0;
+    gap: 0.3rem;
+  }
+  .game .dock-top {
+    flex-wrap: wrap;
+  }
+  .game .power {
+    flex-wrap: nowrap;
+    min-width: 0;
+  }
+  .game .power > strong,
+  .game .end-ready {
+    display: none;
+  }
+  .game .end-wrap {
+    flex-wrap: wrap;
+  }
+  .game .end-warn {
+    font-size: 0.8rem;
+    order: -1;
+  }
+  .game .cell {
+    width: 12px;
+    height: 20px;
+  }
+  .slots {
+    grid-template-columns: 1fr;
+  }
+  .slot {
+    min-height: 40px;
+    font-size: 0.85rem;
+  }
+}
+
+.name-tag {
+  display: inline-block;
+  background: #0b0503cc;
+  color: #fff;
+  border: 2px solid;
+  border-radius: 999px;
+  padding: 0 0.45rem;
+  font-size: 0.8rem;
+  font-weight: 800;
+  white-space: nowrap;
+  pointer-events: none;
+}

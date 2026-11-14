@@ -1,9 +1,9 @@
 import { fmt, isRtl, t } from '../i18n'
+import { useGame, usePreview } from '../state/store'
+import type { Resource } from '../sim/types'
 
 /** Points from now to the end of the sol, in reading direction. */
 const arrow = () => (isRtl() ? ' ← ' : ' → ')
-import { useGame, usePreview } from '../state/store'
-import type { Resource } from '../sim/types'
 
 /** One meter with today's value and a striped preview of where it ends the sol. */
 function Meter({ r }: { r: Resource }) {

@@ -1,19 +1,20 @@
 import { useFrame } from '@react-three/fiber'
-import { useRef } from 'react'
+import { useMemo, useRef } from 'react'
 import * as THREE from 'three'
+import { NameTag } from './models'
 
 /** Where each part of the base stands. Labels in the time-lapse pop up over these. */
 export const spots = {
-  hab: [0, 1.9, 0],
+  hab: [0, 2.9, 0],
   oxygen: [-3.1, 1.2, 1.2],
-  greenhouse: [3.2, 1.4, 1.0],
-  shelter: [0, 3.6, 0],
+  greenhouse: [3.6, 1.9, 1.3],
+  shelter: [0, 4.4, 0],
   lab: [0.6, 1.5, -3.0],
   comms: [-2.6, 2.8, -2.4],
-  solar: [6.2, 1.0, -2.6],
-  rover: [-9, 1.4, 6],
+  solar: [-6.4, 1.4, -2.4],
+  rover: [-6, 2.4, 3.4],
   sky: [0, 6, 0],
-  biggerGreenhouse: [4.4, 1.4, 3.4],
+  biggerGreenhouse: [6.2, 1.6, 2.6],
   iceDrill: [-5.2, 2.2, -0.6],
   walls: [0, 1, 4.6],
 } as const satisfies Record<string, readonly [number, number, number]>
@@ -21,26 +22,59 @@ export const spots = {
 const white = '#eae4dc'
 
 export function Hab() {
+  const beacon = useRef<THREE.MeshStandardMaterial>(null)
+  useFrame(({ clock }) => {
+    if (beacon.current) beacon.current.emissiveIntensity = 0.5 + (Math.sin(clock.elapsedTime * 3) > 0.6 ? 2.5 : 0)
+  })
   return (
     <group>
-      <mesh castShadow receiveShadow position={[0, 0, 0]}>
-        <sphereGeometry args={[1.7, 40, 20, 0, Math.PI * 2, 0, Math.PI / 2]} />
-        <meshStandardMaterial color={white} roughness={0.55} metalness={0.1} />
+      {/* Wall, then the dome on top. */}
+      <mesh castShadow receiveShadow position={[0, 0.35, 0]}>
+        <cylinderGeometry args={[1.95, 2.05, 0.7, 48]} />
+        <meshStandardMaterial color="#d9d2c6" roughness={0.6} />
       </mesh>
-      <mesh position={[0, 0.02, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[1.68, 1.85, 40]} />
-        <meshStandardMaterial color="#8b8f96" />
+      <mesh castShadow receiveShadow position={[0, 0.7, 0]}>
+        <sphereGeometry args={[1.95, 48, 24, 0, Math.PI * 2, 0, Math.PI / 2]} />
+        <meshStandardMaterial color={white} roughness={0.5} metalness={0.08} />
       </mesh>
-      {/* Windows that glow at night. */}
-      {[0, 1, 2, 3, 4].map((i) => (
-        <mesh key={i} position={[Math.cos(i * 1.256) * 1.45, 0.75, Math.sin(i * 1.256) * 1.45]} rotation={[0, -i * 1.256 + Math.PI / 2, 0]}>
-          <boxGeometry args={[0.38, 0.22, 0.05]} />
+      {[0.95, 1.55, 2.1].map((y, i) => (
+        <mesh key={y} position={[0, y, 0]} rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[Math.sqrt(Math.max(0.1, 1.95 ** 2 - (y - 0.7) ** 2)) + 0.01, 0.035, 8, 64]} />
+          <meshStandardMaterial color={i === 0 ? '#8b8f96' : '#b9b3a8'} metalness={0.4} roughness={0.4} />
+        </mesh>
+      ))}
+      <mesh position={[0, 2.7, 0]}>
+        <cylinderGeometry args={[0.32, 0.4, 0.12, 24]} />
+        <meshStandardMaterial color="#b9b3a8" />
+      </mesh>
+      <mesh position={[0, 3.2, 0]}>
+        <cylinderGeometry args={[0.025, 0.025, 1, 6]} />
+        <meshStandardMaterial color="#666" />
+      </mesh>
+      <mesh position={[0, 3.72, 0]}>
+        <sphereGeometry args={[0.07, 10, 8]} />
+        <meshStandardMaterial ref={beacon} color="#ff5040" emissive="#ff2a1a" />
+      </mesh>
+      {/* Windows that glow at night, and a door with an airlock. */}
+      {[0.4, 1.3, 2.2, 3.1, 4.0, 4.9].map((a) => (
+        <mesh key={a} position={[Math.cos(a) * 1.98, 0.42, Math.sin(a) * 1.98]} rotation={[0, -a + Math.PI / 2, 0]}>
+          <boxGeometry args={[0.42, 0.2, 0.05]} />
           <meshStandardMaterial color="#ffd89a" emissive="#ffb54a" emissiveIntensity={1.2} />
         </mesh>
       ))}
+      <group position={[1.15, 0, 1.75]} rotation={[0, 0.58, 0]}>
+        <mesh castShadow position={[0, 0.55, 0.3]} rotation={[Math.PI / 2, 0, 0]}>
+          <cylinderGeometry args={[0.55, 0.55, 1.1, 24]} />
+          <meshStandardMaterial color="#cfc8be" roughness={0.6} />
+        </mesh>
+        <mesh position={[0, 0.5, 0.86]}>
+          <boxGeometry args={[0.5, 0.75, 0.04]} />
+          <meshStandardMaterial color="#5a6470" metalness={0.5} />
+        </mesh>
+      </group>
       {/* A tunnel to the lab. */}
-      <mesh castShadow position={[0.3, 0.45, -1.9]} rotation={[Math.PI / 2, 0, 0.1]}>
-        <cylinderGeometry args={[0.45, 0.45, 1.2, 16]} />
+      <mesh castShadow position={[0.4, 0.45, -2.1]} rotation={[Math.PI / 2, 0, 0.1]}>
+        <cylinderGeometry args={[0.42, 0.42, 1.1, 16]} />
         <meshStandardMaterial color="#cfc8be" roughness={0.6} />
       </mesh>
     </group>
@@ -80,37 +114,46 @@ export function OxygenMaker({ units }: { units: number }) {
   )
 }
 
-export function Greenhouse({ units, position = [3.2, 0, 1.0] as [number, number, number], harvest = 0 }: { units: number; position?: [number, number, number]; harvest?: number }) {
+export function Greenhouse({ units, position = [3.6, 0, 1.3] as [number, number, number], harvest = 0, r = 1.55 }: { units: number; position?: [number, number, number]; harvest?: number; r?: number }) {
   const light = useRef<THREE.PointLight>(null)
   useFrame(({ clock }) => {
-    if (light.current) light.current.intensity = units ? 4 + units * 4 + Math.sin(clock.elapsedTime * 2) : 0
+    if (light.current) light.current.intensity = units ? 3 + units * 3 + Math.sin(clock.elapsedTime * 2) : 0.4
   })
-  const grow = 0.4 + Math.min(1, harvest / 4) * 0.6
+  const dome = useMemo(() => new THREE.SphereGeometry(r, 10, 5, 0, Math.PI * 2, 0, Math.PI / 2), [r])
+  const edges = useMemo(() => new THREE.EdgesGeometry(dome, 1), [dome])
+  const plants = useMemo(() => {
+    const out: [number, number, number][] = []
+    for (let i = 0; i < 40; i++) {
+      const a = i * 2.399
+      const d = Math.sqrt(i / 40) * (r - 0.35)
+      out.push([Math.cos(a) * d, 0.26, Math.sin(a) * d])
+    }
+    return out
+  }, [r])
+  const grow = 0.55 + Math.min(1, harvest / 4) * 0.5
   return (
     <group position={position}>
-      <mesh castShadow position={[0, 0.7, 0]}>
-        <boxGeometry args={[2.2, 1.4, 1.4]} />
-        <meshPhysicalMaterial color="#d9f5ff" transparent opacity={0.28} roughness={0.1} transmission={0.2} />
+      <mesh receiveShadow position={[0, 0.1, 0]}>
+        <cylinderGeometry args={[r + 0.12, r + 0.18, 0.2, 40]} />
+        <meshStandardMaterial color="#2c2a2a" roughness={0.8} />
       </mesh>
-      <mesh position={[0, 1.42, 0]} rotation={[0, 0, Math.PI / 2]}>
-        <cylinderGeometry args={[0.7, 0.7, 2.2, 3, 1, false, 0, Math.PI]} />
-        <meshStandardMaterial color="#d9f5ff" transparent opacity={0.25} side={THREE.DoubleSide} />
+      <mesh position={[0, 0.21, 0]}>
+        <cylinderGeometry args={[r - 0.1, r - 0.1, 0.04, 40]} />
+        <meshStandardMaterial color="#4a3020" roughness={1} />
       </mesh>
-      {[-0.7, -0.2, 0.3, 0.8].map((x, i) => (
-        <group key={i} position={[x, 0.15, 0]}>
-          <mesh>
-            <boxGeometry args={[0.38, 0.2, 1.1]} />
-            <meshStandardMaterial color="#5a3b28" />
-          </mesh>
-          {[-0.35, 0, 0.35].map((z) => (
-            <mesh key={z} position={[0, 0.2 * grow + 0.1, z]} scale={grow}>
-              <coneGeometry args={[0.14, 0.4, 6]} />
-              <meshStandardMaterial color="#5fcf6a" emissive="#1e7a2a" emissiveIntensity={units ? 0.5 : 0.1} />
-            </mesh>
-          ))}
-        </group>
+      {plants.map((p, i) => (
+        <mesh key={i} position={p} scale={grow * (0.8 + (i % 3) * 0.15)}>
+          <sphereGeometry args={[0.11, 8, 6]} />
+          <meshStandardMaterial color={i % 4 ? '#4fbf5a' : '#7ad86a'} emissive="#1e6a26" emissiveIntensity={units ? 0.6 : 0.15} roughness={0.8} />
+        </mesh>
       ))}
-      <pointLight ref={light} position={[0, 1.2, 0]} color="#ff5fd2" distance={5} />
+      <mesh geometry={dome} position={[0, 0.2, 0]}>
+        <meshPhysicalMaterial color="#e6f7ff" transparent opacity={0.16} roughness={0.05} side={THREE.DoubleSide} depthWrite={false} />
+      </mesh>
+      <lineSegments geometry={edges} position={[0, 0.2, 0]}>
+        <lineBasicMaterial color="#f2f2f2" transparent opacity={0.85} />
+      </lineSegments>
+      <pointLight ref={light} position={[0, 0.9, 0]} color="#ff70d8" distance={4.5} />
     </group>
   )
 }
@@ -182,16 +225,38 @@ export function Shield({ units, hit }: { units: number; hit: number }) {
   })
   return (
     <mesh position={[0, 0, 0]}>
-      <sphereGeometry args={[4.6, 48, 24, 0, Math.PI * 2, 0, Math.PI / 2]} />
+      <sphereGeometry args={[5.4, 48, 24, 0, Math.PI * 2, 0, Math.PI / 2]} />
       <meshStandardMaterial ref={mat} color="#8fd3ff" emissive="#3aa0ff" transparent opacity={0} depthWrite={false} side={THREE.DoubleSide} />
     </mesh>
   )
 }
 
+function usePanelTexture() {
+  return useMemo(() => {
+    const c = document.createElement('canvas')
+    c.width = 128
+    c.height = 96
+    const g = c.getContext('2d')!
+    g.fillStyle = '#16245a'
+    g.fillRect(0, 0, 128, 96)
+    g.strokeStyle = '#8fa6d8'
+    g.lineWidth = 1.5
+    for (let x = 0; x <= 128; x += 16) g.strokeRect(x, 0, 0, 96)
+    for (let y = 0; y <= 96; y += 16) g.strokeRect(0, y, 128, 0)
+    g.strokeStyle = '#d8dde6'
+    g.lineWidth = 4
+    g.strokeRect(0, 0, 128, 96)
+    const t = new THREE.CanvasTexture(c)
+    t.colorSpace = THREE.SRGBColorSpace
+    return t
+  }, [])
+}
+
 export function SolarPanels({ extra }: { extra: boolean }) {
+  const tex = usePanelTexture()
   const rows = extra ? 4 : 2
   return (
-    <group position={[6.2, 0, -2.6]} rotation={[0, -0.5, 0]}>
+    <group position={[-6.4, 0, -2.4]} rotation={[0, 0.5, 0]}>
       {Array.from({ length: rows * 3 }, (_, i) => {
         const r = Math.floor(i / 3)
         const c = i % 3
@@ -203,7 +268,7 @@ export function SolarPanels({ extra }: { extra: boolean }) {
             </mesh>
             <mesh castShadow position={[0, 0.72, 0]} rotation={[-0.6, 0, 0]}>
               <boxGeometry args={[1.35, 0.04, 1]} />
-              <meshStandardMaterial color="#1d2c5c" metalness={0.7} roughness={0.25} emissive="#0b1a40" />
+              <meshStandardMaterial map={tex} metalness={0.6} roughness={0.3} />
             </mesh>
           </group>
         )
@@ -237,7 +302,7 @@ export function Walls({ moon }: { moon: boolean }) {
       {Array.from({ length: 22 }, (_, i) => {
         const a = (i / 22) * Math.PI * 2
         return (
-          <mesh key={i} castShadow position={[Math.cos(a) * 5.4, 0.3, Math.sin(a) * 5.4]} rotation={[0, -a, 0]}>
+          <mesh key={i} castShadow position={[Math.cos(a) * 6.4, 0.3, Math.sin(a) * 6.4]} rotation={[0, -a, 0]}>
             <boxGeometry args={[1.5, 0.6, 0.5]} />
             <meshStandardMaterial color={moon ? '#7d7d7f' : '#8a3d1c'} roughness={1} />
           </mesh>
@@ -348,7 +413,7 @@ export function Flyer({ on, moon }: { on: boolean; moon: boolean }) {
 const suit = ['#ffb36b', '#8fd3ff', '#6fdc9a']
 
 /** The crew walks between the hab and the jobs they are doing today. */
-export function Crew({ jobs }: { jobs: [number, number, number][] }) {
+export function Crew({ jobs, names }: { jobs: [number, number, number][]; names: string[] }) {
   const refs = useRef<(THREE.Group | null)[]>([])
   useFrame(({ clock }) => {
     refs.current.forEach((g, i) => {
@@ -383,6 +448,7 @@ export function Crew({ jobs }: { jobs: [number, number, number][] }) {
             <boxGeometry args={[0.3, 0.35, 0.14]} />
             <meshStandardMaterial color={c} />
           </mesh>
+          <NameTag name={names[i]} color={c} />
         </group>
       ))}
     </>

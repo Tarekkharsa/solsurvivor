@@ -15,6 +15,8 @@ import { setMood } from '../lib/audio'
 import { warning } from '../sim/engine'
 import { StageSlot } from '../ui/StageSlot'
 import { IntroOverlay } from '../ui/IntroOverlay'
+import { Hud } from '../ui/Hud'
+import { ProjectsDialog } from '../ui/ProjectsDialog'
 import { canDo3D } from '../lib/device'
 
 export function App() {
@@ -57,6 +59,8 @@ export function App() {
       {modal === 'badges' && <Badges />}
       {modal === 'teamcheck' && <TeamCheck />}
       {modal === 'settings' && <Settings />}
+      {modal === 'explore' && <ProjectsDialog kind="explore" />}
+      {modal === 'build' && <ProjectsDialog kind="build" />}
     </>
   )
 
@@ -73,6 +77,26 @@ export function App() {
         <Title key={lang} />
         {modals}
       </>
+    )
+
+  if (view3d)
+    return (
+      <div className="game" key={lang}>
+        <a className="skip" href="#plan">
+          {t('skipToPlan')}
+        </a>
+        <StageSlot />
+        <div className="game-ui" inert={(screen !== 'play' && screen !== 'lapse') || !!modal} hidden={screen === 'lapse'}>
+          <Hud />
+          <Morning />
+          <PlanPanel inGame />
+        </div>
+        {screen === 'intro' && <IntroOverlay />}
+        {screen === 'report' && <Report />}
+        {screen === 'end' && <End />}
+        <Coach />
+        {modals}
+      </div>
     )
 
   return (
