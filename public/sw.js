@@ -1,6 +1,6 @@
 // Offline: the page is network-first (so updates arrive), everything else is
 // cache-first and saved the first time it loads. Photos are fetched up front.
-const CACHE = 'solsurvivor-v3'
+const CACHE = 'solsurvivor-v4'
 const PHOTOS = ['landing', 'delta', 'wildcat', 'depot', 'rim', 'cheyava', 'flight', 'seitah', 'blue-sunset', 'moon-landing', 'malapert', 'moon-pole', 'lcross', 'aitken', 'lro-earth']
 
 self.addEventListener('install', (e) => {
@@ -28,12 +28,17 @@ self.addEventListener('fetch', (e) => {
   const sameOrigin = url.origin === location.origin
   const fonts = url.host === 'fonts.googleapis.com' || url.host === 'fonts.gstatic.com'
   if (!sameOrigin && !fonts) return
+  // The demo video page streams; keep it out of the offline cache.
+  if (sameOrigin && url.pathname.includes('/video/')) return
   if (req.mode === 'navigate') {
     e.respondWith(
       fetch(req)
         .then((r) => {
-          const copy = r.clone()
-          caches.open(CACHE).then((c) => c.put('./', copy))
+          // Only the game's own page becomes the offline start page.
+          if (r.ok && (r.headers.get('content-type') ?? '').includes('text/html')) {
+            const copy = r.clone()
+            caches.open(CACHE).then((c) => c.put('./', copy))
+          }
           return r
         })
         .catch(() => caches.match('./')),

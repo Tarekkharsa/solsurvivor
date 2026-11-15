@@ -5,5 +5,5 @@ cd "$(dirname "$0")/.."
 npx tsc -p .
 npx vite build
 rm -f ../solsurvivor-web.zip
-(cd dist && zip -qr ../../solsurvivor-web.zip .)
+(cd dist && zip -qr ../../solsurvivor-web.zip . -x 'video/*')
 echo "Wrote $(cd .. && pwd)/solsurvivor-web.zip ($(du -h ../solsurvivor-web.zip | cut -f1))"
