@@ -47,12 +47,19 @@ to four on one computer, in English or Arabic, even offline.
 | LRO, LCROSS, Apollo seismometers, Artemis II | Moon sites, ice, moonquakes, long shadows and the Aitken basin photo |
 | NASA Image and Video Library | 15 photos, each with its NASA ID |
 | NASA Mars Trek (Viking MDIM 2.1), NASA SVS CGI Moon Kit | The globes in the opening shot |
+| NASA Clementine (PIA00001) | The Moon expedition map |
+
+## Space Agency Partner data and other references
+
+- **ESA** Mars Express HRSC image of Jezero Crater (PIA24096, ESA/DLR/FU Berlin, CC BY-SA 3.0 IGO): the Mars expedition map.
+- NOAA SWPC GOES X-ray flux: the fallback for live solar flares.
+- Open-source code: React, three.js, React Three Fiber, drei, zustand (all MIT). Full list with licences in CREDITS.md.
 
 ## Tools
 
 React, TypeScript, Vite, React Three Fiber (three.js), zustand, Vitest, Playwright, axe-core.
 
-## Use of AI (disclosure)
+## Use of Super Intelligence (SI) (the form's "Use of SI" field)
 
 The team used Claude Code (Anthropic) as a coding assistant to write and test the code,
 the Arabic draft text and the demo video recorder. The team chose the design, checked the

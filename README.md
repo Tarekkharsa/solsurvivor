@@ -56,3 +56,10 @@ Useful URL options: `lang=ar`, `world=moon`, `level=commander`, `seed=1004`,
 
 See [CREDITS.md](CREDITS.md) for every NASA source, and [docs/](docs/) for the
 submission draft, hosting steps and the playtest kit.
+
+## Use of AI
+
+The team used Claude Code (Anthropic) as a coding assistant to write and test the code,
+draft the Arabic text and build the demo video recorder. The idea and design are the team's;
+the team checked every NASA fact and source. The game has no AI-generated images, voices or
+video: all photos and globes come from NASA (and one map from ESA), and the music is made by code.
